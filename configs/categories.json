@@ -1,0 +1,33 @@
+{
+    "type": [
+        "masters fellowships",
+        "doctoral fellowships",
+        "summer fellowships"
+    ],
+    "discipline": [
+        "science",
+        "medicine / health sciences",
+        "technology",
+        "engineering"
+    ],
+    "location": [
+        "north america"
+    ],
+    "citizenship requirement": [
+        "any",
+        "united states"
+    ],
+    "residency requirement": [
+        "any",
+        "united states"
+    ],
+    "work experience": [
+    
+    ],
+    "funding type": [
+        "fully funded"
+    ],
+    "deadline": [
+
+    ]
+}
