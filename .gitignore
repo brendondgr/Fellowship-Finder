@@ -2,6 +2,8 @@
 uv.lock
 pyproject.toml
 login.json
+tmp/
+data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
