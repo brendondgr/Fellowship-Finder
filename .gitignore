@@ -4,6 +4,8 @@ pyproject.toml
 login.json
 tmp/
 data/
+genai.ipynb
+api_key.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

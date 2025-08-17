@@ -13,6 +13,7 @@ from selenium.common.exceptions import TimeoutException, StaleElementReferenceEx
 import configparser
 import os
 from utils.data import DataProcessor
+from utils.refinement import GeminiRefiner
 
 
 class ProfellowBot:
@@ -28,6 +29,9 @@ class ProfellowBot:
         
         # --- Data Processor ---
         self.data_processor = DataProcessor()
+
+        # --- Gemini Refiner ---
+        self.refiner = GeminiRefiner()
 
         # Ensure tmp directory exists
         os.makedirs(self.tmp_path, exist_ok=True)
@@ -345,6 +349,11 @@ class ProfellowBot:
         finally:
             print("Closing the browser.")
             self.driver.quit()
+
+            # --- Refine and Save Data ---
+            print("Starting data refinement process...")
+            self.data_processor.refine_and_save_fellowships(self.refiner)
+            print("Data refinement process finished.")
 
     def _load_more_results(self):
         print("Attempting to load more results...")

@@ -1,16 +1,21 @@
 import configparser
 import os
+import re
 import pandas as pd
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
+from tqdm import tqdm
 
 class DataProcessor:
     def __init__(self):
         config = configparser.ConfigParser()
         config.read('config.ini')
         self.raw_data_path = config.get('PATHS', 'raw_data', fallback='data/raw/')
+        self.processed_data_path = config.get('PATHS', 'processed_data', fallback='data/processed/')
         os.makedirs(self.raw_data_path, exist_ok=True)
+        os.makedirs(self.processed_data_path, exist_ok=True)
         self.fellowship_csv_path = os.path.join(self.raw_data_path, "raw_fellowship_list.csv")
+        self.processed_fellowship_csv_path = os.path.join(self.processed_data_path, "processed_fellowship_list.csv")
 
     def process_fellowships(self, fellowship_elements):
         print(f"Processing {len(fellowship_elements)} fellowship elements.")
@@ -93,3 +98,110 @@ class DataProcessor:
             print(f"Added {len(new_fellowships)} new fellowships. Total fellowships: {len(df)}")
         else:
             print("No new fellowships to add.")
+
+    def refine_and_save_fellowships(self, refiner):
+        if not os.path.exists(self.fellowship_csv_path):
+            print("Raw fellowship data not found.")
+            return
+
+        raw_df = pd.read_csv(self.fellowship_csv_path)
+        unprocessed_df = raw_df[raw_df['processed'] == 'no']
+
+        if unprocessed_df.empty:
+            print("No new fellowships to process.")
+            return
+
+        print(f"Found {len(unprocessed_df)} unprocessed fellowships to refine.")
+
+        if os.path.exists(self.processed_fellowship_csv_path):
+            processed_df = pd.read_csv(self.processed_fellowship_csv_path)
+        else:
+            processed_df = pd.DataFrame()
+
+        refined_data_list = []
+        
+        # Wrap the loop with tqdm for a progress bar
+        for index, row in tqdm(unprocessed_df.iterrows(), total=unprocessed_df.shape[0], desc="Refining Fellowships"):
+            # print(f"Refining row {index + 2}: {row['title']}") # Now handled by tqdm
+            try:
+                refined_data = refiner.refine(row)
+                if refined_data:
+                    cleaned_data = self._clean_and_validate_refined_data(refined_data)
+                    if cleaned_data:
+                        print("\nCleaned and validated data:")
+                        print(cleaned_data)
+                        refined_data_list.append(cleaned_data)
+                        raw_df.loc[index, 'processed'] = 'yes'
+            except Exception as e:
+                print(f"An error occurred while refining row {index + 2}: {e}")
+                raw_df.loc[index, 'processed'] = 'error'
+
+        if refined_data_list:
+            new_processed_df = pd.DataFrame(refined_data_list)
+
+            if processed_df.empty:
+                processed_df = new_processed_df
+            else:
+                processed_df = pd.concat([processed_df, new_processed_df], ignore_index=True)
+
+            processed_df.drop_duplicates(subset=['link'], keep='last', inplace=True)
+            processed_df.to_csv(self.processed_fellowship_csv_path, index=False)
+            print(f"Saved/updated {len(new_processed_df)} refined fellowships to {self.processed_fellowship_csv_path}")
+
+            raw_df.to_csv(self.fellowship_csv_path, index=False)
+            print("Updated raw_fellowship_list.csv with processed status.")
+
+    def _clean_and_validate_refined_data(self, data):
+        required_keys = {
+            "title": str, "location": str, "continent": str,
+            "deadline": str, "link": str, "description": str,
+            "subjects": list, "total_compensation": str,
+            "length_in_years": int, "interest_rating": float
+        }
+
+        # Ensure all required keys are present
+        for key in required_keys:
+            if key not in data:
+                print(f"Missing key in refined data: {key}")
+                return None
+
+        # Clean and validate data types
+        try:
+            # String fields
+            for key in ["title", "location", "continent", "link", "description"]:
+                data[key] = str(data[key])
+
+            # Deadline: should be in YYYY-MM format
+            deadline = str(data.get("deadline", ""))
+            if re.match(r"\d{4}-\d{2}", deadline):
+                data["deadline"] = deadline
+            else:
+                data["deadline"] = "NA"
+            
+            # Subjects: should be a list of strings
+            subjects = data.get("subjects", [])
+            if isinstance(subjects, list) and all(isinstance(s, str) for s in subjects):
+                data["subjects"] = subjects
+            else:
+                data["subjects"] = []
+
+            # Total Compensation: should start with $
+            compensation = str(data.get("total_compensation", ""))
+            if compensation.startswith("$"):
+                data["total_compensation"] = compensation
+            else:
+                data["total_compensation"] = f"${compensation}"
+
+            # Length in years: should be an integer
+            length = data.get("length_in_years")
+            data["length_in_years"] = int(length) if str(length).isdigit() else 0
+
+            # Interest rating: should be a float
+            rating = data.get("interest_rating")
+            data["interest_rating"] = float(rating)
+
+        except (ValueError, TypeError) as e:
+            print(f"Data validation error: {e}")
+            return None
+
+        return data

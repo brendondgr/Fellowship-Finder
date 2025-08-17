@@ -1,4 +1,9 @@
 requests
 selenium
-webdriver-manager[firefox]
+webdriver-manager
 pandas
+google-genai
+ipykernel
+beautifulsoup4
+python-dotenv
+tqdm
