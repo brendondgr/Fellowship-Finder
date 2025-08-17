@@ -6,6 +6,7 @@ tmp/
 data/
 genai.ipynb
 api_key.json
+.kiro/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

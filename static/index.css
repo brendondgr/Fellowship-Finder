@@ -2,3 +2,23 @@
 body {
     font-family: 'Inter', sans-serif;
 }
+
+@keyframes swipeOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.swipe-out {
+    animation: swipeOut 0.5s forwards;
+}
+
+.favorite-btn.favorited svg {
+    fill: #ef4444; /* red-500 */
+    color: #ef4444; /* red-500 */
+}
