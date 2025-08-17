@@ -7,3 +7,4 @@ ipykernel
 beautifulsoup4
 python-dotenv
 tqdm
+flask
