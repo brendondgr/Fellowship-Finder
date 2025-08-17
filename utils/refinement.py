@@ -6,7 +6,7 @@ import time
 from tqdm import tqdm
 
 class GeminiRefiner:
-    def __init__(self, model_name="gemini-2.5-flash-preview-05-20"):
+    def __init__(self, model_name="gemini-2.5-flash-lite"):
         # Load the Gemini API key from the api_key.json file
         api_key_path = 'configs/api_key.json'
         if not os.path.exists(api_key_path):
@@ -20,18 +20,35 @@ class GeminiRefiner:
         
         self.model = model_name
         
+        if "flash" in self.model.lower():
+            self.rate_limit_interval = 60 / 10  # 10 requests per minute
+        elif "pro" in self.model.lower():
+            self.rate_limit_interval = 60 / 5   # 5 requests per minute
+        else:
+            self.rate_limit_interval = 0  # No rate limit
+        
+        self.last_request_time = 0
+        
         self.client = genai.Client(
             api_key=gemini_api_key
         )
         
         self.interests = f"""
-I am currently interested in the applications of Artificial Intellig    `ence and Machine Learning to the field of Medicine. I am currently researching Robotic Surgery and the applications, limitations and opportunities of this in the field. I am a PhD Student studying Scientific Computing and Computational Science. I have a Biochemistry BS.
+I am currently interested in the applications of Artificial Intelligence and Machine Learning to the field of Medicine. I am currently researching Robotic Surgery and the applications, limitations and opportunities of this in the field. I am a PhD Student studying Scientific Computing and Computational Science. I have a Biochemistry BS.
 
 Generally, I am interested in any forms of technology, science, robotics, and medicine.
 
 I am a male US Citizen, and I am currently living in the United States. I am also of Hispanic ethnicity.
 """
     def refine(self, row):
+        if self.rate_limit_interval > 0:
+            current_time = time.time()
+            time_since_last_request = current_time - self.last_request_time
+            if time_since_last_request < self.rate_limit_interval:
+                wait_time = self.rate_limit_interval - time_since_last_request
+                time.sleep(wait_time)
+            self.last_request_time = time.time()
+            
         # Format the fellowship text
         self.fellowship_text = self._format_fellowship(row)
         
@@ -56,13 +73,16 @@ I am looking for you to extract information about the fellowship, and provide me
 ```
 Subjects should be a list of strings, and should be "science", "medicine", "technology", "engineering", "arts", "social sciences", etc. Not "Minorities", "Full Funding", etc.
 
-Interest rating should be a float between 1.0 and 4.0, which is based on the following criteria:
-- 1: I qualify based on my Citizenship and Residency.
-- 2: I qualify based on my Background, specifically the subject I have studied and what I am currently studying.
-- 3: The fellowship is correlated with what I am interested in. If it has some overlap, this rating added should be 0.5, instead of 1.0. If no overlap, subtract 1.0 from the entire score.
-- 4: The fellowship covers at least a single year. 
+The month is August, 2025. For the deadline, it may say something along the lines of "December". If we have not past December, then the deadline should be this December, 2025. If it is January, since we are in August and January is in the future, then the deadline should be this January, 2026.
 
-My interests are, which should sway how you decide #3, are:
+For funding, please return the total amount of funding. If it is a $25,000 annual Stipend + Others for 2 years, please phrase it as "$50,000 + Other".
+
+Interest rating should be a float between 1.0 and 3.0, which is based on the following criteria:
+- 1: I qualify based on my Citizenship, Residency and Background, specifically the subject I have studied and what I am currently studying.
+- 2: The fellowship is correlated with what I am interested in. If it has some overlap, this rating added should be 0.5, instead of 1.0.
+- 3: The fellowship covers at least a single year.
+
+My interests are, which should sway how you decide #2, are:
 {self.interests}
 
 You should return a single JSON Object containing the information for the fellowship. Also if any subcategory of the fellowship is not clear, you should return a "NA" for that subcategory.

@@ -71,6 +71,17 @@ def undo_remove_fellowship(fellowship_id):
         return jsonify({"success": True})
     return jsonify({"success": False}), 404
 
+@app.route('/api/refresh', methods=['POST'])
+def refresh_data():
+    """
+    Refreshes the data by checking for the processed data file and reloading it if necessary.
+    """
+    try:
+        data_manager.refresh_data_if_needed()
+        return jsonify({'success': True, 'message': 'Data refreshed successfully.'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route("/api/status", methods=['GET'])
 def get_status():
     return jsonify({

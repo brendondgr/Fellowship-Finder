@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const browserFirefox = document.getElementById('browser-firefox');
     const notificationContainer = document.getElementById('notification-container');
     const notificationMessage = document.getElementById('notification-message');
+    const refreshBtn = document.getElementById('refresh-btn');
 
     function showNotification(message, isError = false) {
         notificationMessage.textContent = message;
@@ -50,6 +51,30 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             notificationContainer.classList.add('hidden');
         }, 5000); // Hide after 5 seconds
+    }
+
+    if(refreshBtn) {
+        refreshBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            showNotification('Refreshing data...');
+            
+            fetch('/api/refresh', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success) {
+                        currentPage = 1;
+                        fellowshipCardsContainer.innerHTML = '';
+                        fetchFellowships();
+                        showNotification('Data refreshed successfully!');
+                    } else {
+                        showNotification(data.error || 'Failed to refresh data.', true);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error refreshing data:', error);
+                    showNotification('Error refreshing data.', true);
+                });
+        });
     }
 
     // --- Scrape and Process Button Event Listeners ---
@@ -279,10 +304,16 @@ document.addEventListener('DOMContentLoaded', () => {
         card.classList.add('swipe-out');
         card.addEventListener('animationend', () => {
             card.remove();
-            document.getElementById('total-opportunities').textContent = parseInt(document.getElementById('total-opportunities').textContent) - 1;
         });
 
-        fetch(`/api/fellowships/${fellowshipId}/remove`, { method: 'POST' });
+        fetch(`/api/fellowships/${fellowshipId}/remove`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('total-opportunities').textContent = data.total_count;
+                }
+            })
+            .catch(error => console.error('Error removing fellowship:', error));
 
         recentlyRemovedId = fellowshipId;
         const undoContainer = document.getElementById('undo-container');
@@ -297,10 +328,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function undoRemoveFellowship(fellowshipId) {
         fetch(`/api/fellowships/${fellowshipId}/undo`, { method: 'POST' })
-            .then(() => {
-                currentPage = 1;
-                fellowshipCardsContainer.innerHTML = '';
-                fetchFellowships();
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentPage = 1;
+                    fellowshipCardsContainer.innerHTML = '';
+                    fetchFellowships();
+                }
             });
     }
 
