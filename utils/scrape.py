@@ -4,11 +4,13 @@ import random
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.edge.service import Service as EdgeService
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.firefox import GeckoDriverManager
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.microsoft import EdgeChromiumDriverManager
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException, NoSuchElementException
 import configparser
 import os
@@ -17,14 +19,23 @@ from utils.refinement import GeminiRefiner
 
 
 class ProfellowBot:
-    def __init__(self, browser='firefox'):
-        self.browser = browser.lower()
-        self._initialize_driver()
-
-        # --- Configuration ---
+    def __init__(self, browser=None):
         config = configparser.ConfigParser()
         config.read('config.ini')
         self.configs_path = config.get('PATHS', 'configs', fallback='configs/')
+
+        # Load filters from JSON file for browser selection and categories
+        with open(os.path.join(self.configs_path, "filters.json"), "r") as f:
+            filters_data = json.load(f)
+
+        if browser:
+            self.browser = browser.lower()
+        else:
+            self.browser = filters_data.get('Browsing', 'firefox').lower()
+
+        self._initialize_driver()
+
+        # --- Configuration ---
         self.tmp_path = config.get('PATHS', 'tmp', fallback='tmp/')
         
         # --- Data Processor ---
@@ -40,9 +51,7 @@ class ProfellowBot:
         with open(os.path.join(self.configs_path, "login.json"), "r") as f:
             self.login_data = json.load(f)
 
-        # Load categories and items to be selected from a JSON file
-        with open(os.path.join(self.configs_path, "filters.json"), "r") as f:
-            self.categories_data = json.load(f)["categories"]
+        self.categories_data = filters_data["categories"]
 
         self.LOGIN_URL = "https://www.profellow.com/log-in/"
 
@@ -56,8 +65,15 @@ class ProfellowBot:
             service = ChromeService(ChromeDriverManager().install())
             self.driver = webdriver.Chrome(service=service)
             print("Chrome WebDriver initialized.")
+        elif self.browser == "edge":
+            service = EdgeService(EdgeChromiumDriverManager().install())
+            self.driver = webdriver.Edge(service=service)
+            print("Edge WebDriver initialized.")
+        elif self.browser == "safari":
+            self.driver = webdriver.Safari()
+            print("Safari WebDriver initialized.")
         else:
-            raise ValueError(f"Unsupported browser: '{self.browser}'. Please choose 'firefox' or 'chrome'.")
+            raise ValueError(f"Unsupported browser: '{self.browser}'. Please choose 'firefox', 'chrome', 'edge', or 'safari'.")
         
     def _are_categories_same(self):
         """Deep compares the filters.json files in configs/ and tmp/."""

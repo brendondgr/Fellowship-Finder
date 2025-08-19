@@ -5,6 +5,7 @@ import pandas as pd
 import subprocess
 import sys
 import json
+import os
 
 app = Flask(__name__)
 data_manager = DataManager()
@@ -100,32 +101,54 @@ def get_status():
 
 @app.route('/api/filters', methods=['GET', 'POST'])
 def manage_filters():
-    filters_path = 'configs/filters.json'
+    filters_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'configs', 'filters.json')
     if request.method == 'GET':
         try:
+            print(f"[GET /api/filters] Loading filters from: {filters_path}")
             with open(filters_path, 'r') as f:
                 filters = json.load(f)
-            print("Loaded filters from JSON:", json.dumps(filters, indent=2))
+            print("[GET /api/filters] Loaded filters:")
+            print(json.dumps(filters, indent=2))
             return jsonify(filters)
         except FileNotFoundError:
+            print(f"[GET /api/filters] Filters file not found at: {filters_path}")
             return jsonify({"error": "Filters file not found."}), 404
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
+            print(f"[GET /api/filters] Error decoding filters file: {e}")
             return jsonify({"error": "Error decoding filters file."}), 500
 
     if request.method == 'POST':
         try:
             new_filters = request.json
-            print("Saving filters to JSON:", json.dumps(new_filters, indent=2))
+            print("[POST /api/filters] Saving filters to JSON at:", filters_path)
+            print(json.dumps(new_filters, indent=2))
             with open(filters_path, 'w') as f:
                 json.dump(new_filters, f, indent=4)
             return jsonify({"success": True, "message": "Filters saved successfully."})
         except Exception as e:
+            print(f"[POST /api/filters] Error saving filters: {e}")
             return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/scrape', methods=['GET', 'POST'])
 def scrape():
     if request.method == 'GET':
-        return render_template('scrape.html')
+        # Load filters before rendering the template so values are pre-populated
+        filters_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'configs', 'filters.json')
+        filters = {}
+        try:
+            print(f"[GET /scrape] Loading filters from: {filters_path}")
+            with open(filters_path, 'r') as f:
+                filters = json.load(f)
+            browsing = filters.get('Browsing')
+            categories = list(filters.get('categories', {}).keys())
+            keywords = filters.get('keywords', {})
+            sys_instr_len = len(filters.get('system_instructions', '') or '')
+            print(f"[GET /scrape] Loaded. Browsing={browsing}; Categories={categories}; KeywordType={keywords.get('type')}; KeywordCount={len(keywords.get('words', []))}; SystemInstructionsLength={sys_instr_len}")
+        except FileNotFoundError:
+            print(f"[GET /scrape] Filters file not found at: {filters_path}. Proceeding with defaults.")
+        except json.JSONDecodeError as e:
+            print(f"[GET /scrape] Error decoding filters file: {e}. Proceeding with defaults.")
+        return render_template('scrape.html', filters=filters)
     
     data = request.get_json()
     cleanup = data.get('cleanup', False)

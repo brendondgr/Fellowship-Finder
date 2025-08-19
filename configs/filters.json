@@ -2,6 +2,7 @@
     "Browsing": "firefox",
     "categories": {
         "Fellowship Type": [
+            "Professional Fellowships",
             "Masters Fellowships",
             "Doctoral Fellowships",
             "Summer Fellowships"
@@ -23,21 +24,15 @@
             "Any",
             "United States"
         ],
-        "Work Experience": [
-        
-        ],
+        "Work Experience": [],
         "Funding Type": [
             "Fully Funded"
         ],
-        "Deadline": [
-
-        ]
+        "Deadline": []
     },
     "keywords": {
-        "type": "AND",
-        "words": [
-            
-        ]
+        "type": "OR",
+        "words": []
     },
     "system_instructions": ""
 }

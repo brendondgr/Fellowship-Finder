@@ -174,6 +174,61 @@ document.addEventListener('DOMContentLoaded', () => {
                                 optionsContainer.style.maxHeight = \`\${options.scrollHeight}px\`;
                             }
                         });
+
+                        // --- Save Filters on Begin Searching ---
+                        const modalRoot = document.getElementById('scrape-modal-content');
+                        const beginSearchingBtn = modalRoot.querySelector('#begin-searching-btn');
+                        if (beginSearchingBtn) {
+                            beginSearchingBtn.addEventListener('click', async () => {
+                                try {
+                                    const selectedBrowserButton = modalRoot.querySelector('.browser-btn.selected');
+                                    const browsing = selectedBrowserButton ? selectedBrowserButton.dataset.browser : 'firefox';
+
+                                    const filtersToSave = {
+                                        Browsing: browsing,
+                                        categories: {},
+                                        keywords: {
+                                            type: (modalRoot.querySelector('.keyword-logic-btn.selected') || {}).dataset?.logic || 'AND',
+                                            words: (modalRoot.querySelector('#keywords-input')?.value || '').split(',').map(s => s.trim()).filter(Boolean)
+                                        },
+                                        system_instructions: modalRoot.querySelector('#system-instructions-textarea')?.value || ''
+                                    };
+
+                                    modalRoot.querySelectorAll('[data-category]').forEach(container => {
+                                        const category = container.dataset.category;
+                                        if (category === 'keywords' || category === 'system_instructions') return;
+
+                                        if (category === 'Citizenship Requirement' || category === 'Residency Requirement') {
+                                            const input = container.querySelector('input');
+                                            const value = input ? input.value : '';
+                                            filtersToSave.categories[category] = value.split(',').map(s => s.trim()).filter(Boolean);
+                                        } else {
+                                            const selected = [];
+                                            container.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+                                                selected.push(checkbox.value);
+                                            });
+                                            filtersToSave.categories[category] = selected;
+                                        }
+                                    });
+
+                                    const resp = await fetch('/api/filters', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify(filtersToSave, null, 4)
+                                    });
+
+                                    const result = await resp.json();
+                                    if (resp.ok && result.success) {
+                                        alert('Filters saved successfully!');
+                                    } else {
+                                        alert('Error saving filters: ' + (result.error || resp.statusText));
+                                    }
+                                } catch (err) {
+                                    console.error('Error saving filters:', err);
+                                    alert('An error occurred while saving filters.');
+                                }
+                            });
+                        }
                     `;
                     scrapeModalContent.appendChild(scriptElement);
                 })

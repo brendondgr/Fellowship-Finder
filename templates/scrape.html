@@ -60,6 +60,11 @@
 </head>
 <body class="bg-white">
 
+    <!-- Jinja helpers -->
+    {% set selected_browser = filters.get('Browsing', '') %}
+    {% set categories = filters.get('categories', {}) %}
+    {% set keyword_logic = (filters.get('keywords', {}).get('type', 'AND') | upper) %}
+
     <!-- Main Page Content Container -->
     <div class="p-6 sm:p-8 w-full max-w-5xl mx-auto">
 
@@ -80,10 +85,10 @@
             <div>
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">Browser Type</h2>
                 <div class="flex flex-wrap gap-2 sm:gap-4">
-                    <button data-browser="chrome" class="browser-btn selected flex-grow sm:flex-grow-0 text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 hover:opacity-80 transition-all duration-200">Chrome</button>
-                    <button data-browser="firefox" class="browser-btn flex-grow sm:flex-grow-0 text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 text-gray-600 hover:opacity-80 transition-all duration-200">Firefox</button>
-                    <button data-browser="safari" class="browser-btn flex-grow sm:flex-grow-0 text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 text-gray-600 hover:opacity-80 transition-all duration-200">Safari</button>
-                    <button data-browser="edge" class="browser-btn flex-grow sm:flex-grow-0 text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 text-gray-600 hover:opacity-80 transition-all duration-200">Edge</button>
+                    <button data-browser="chrome" class="browser-btn {% if selected_browser == 'chrome' %}selected{% else %}text-gray-600{% endif %} flex-grow sm:flex-grow-0 text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 hover:opacity-80 transition-all duration-200">Chrome</button>
+                    <button data-browser="firefox" class="browser-btn {% if selected_browser == 'firefox' %}selected{% else %}text-gray-600{% endif %} flex-grow sm:flex-grow-0 text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 hover:opacity-80 transition-all duration-200">Firefox</button>
+                    <button data-browser="safari" class="browser-btn {% if selected_browser == 'safari' %}selected{% else %}text-gray-600{% endif %} flex-grow sm:flex-grow-0 text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 hover:opacity-80 transition-all duration-200">Safari</button>
+                    <button data-browser="edge" class="browser-btn {% if selected_browser == 'edge' %}selected{% else %}text-gray-600{% endif %} flex-grow sm:flex-grow-0 text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 hover:opacity-80 transition-all duration-200">Edge</button>
                 </div>
             </div>
             <!-- Gemini API Key -->
@@ -109,15 +114,15 @@
                     </div>
                     <div class="filter-options-container pl-6">
                         <div class="space-y-2 text-sm">
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Professional Fellowships">Professional Fellowships</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Doctoral Programs">Doctoral Programs</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Masters Programs">Masters Programs</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Post-doctoral Fellowships">Post-doctoral Fellowships</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Masters Fellowships">Masters Fellowships</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Doctoral Fellowships">Doctoral Fellowships</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Undergraduate Fellowships">Undergraduate Fellowships</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Summer Fellowships">Summer Fellowships</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Business Accelerators">Business Accelerators</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Professional Fellowships" {% if 'Professional Fellowships' in categories.get('Fellowship Type', []) %}checked{% endif %}>Professional Fellowships</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Doctoral Programs" {% if 'Doctoral Programs' in categories.get('Fellowship Type', []) %}checked{% endif %}>Doctoral Programs</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Masters Programs" {% if 'Masters Programs' in categories.get('Fellowship Type', []) %}checked{% endif %}>Masters Programs</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Post-doctoral Fellowships" {% if 'Post-doctoral Fellowships' in categories.get('Fellowship Type', []) %}checked{% endif %}>Post-doctoral Fellowships</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Masters Fellowships" {% if 'Masters Fellowships' in categories.get('Fellowship Type', []) %}checked{% endif %}>Masters Fellowships</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Doctoral Fellowships" {% if 'Doctoral Fellowships' in categories.get('Fellowship Type', []) %}checked{% endif %}>Doctoral Fellowships</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Undergraduate Fellowships" {% if 'Undergraduate Fellowships' in categories.get('Fellowship Type', []) %}checked{% endif %}>Undergraduate Fellowships</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Summer Fellowships" {% if 'Summer Fellowships' in categories.get('Fellowship Type', []) %}checked{% endif %}>Summer Fellowships</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Business Accelerators" {% if 'Business Accelerators' in categories.get('Fellowship Type', []) %}checked{% endif %}>Business Accelerators</label>
                         </div>
                     </div>
                 </div>
@@ -130,18 +135,18 @@
                     </div>
                     <div class="filter-options-container pl-6">
                         <div class="space-y-2 text-sm">
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Social Sciences / Liberal Arts">Social Sciences / Liberal Arts</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Science">Science</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Medicine / Health Sciences">Medicine / Health Sciences</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Public Service">Public Service</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Technology">Technology</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Creative Arts">Creative Arts</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Engineering">Engineering</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Business">Business</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="International Affairs">International Affairs</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Education">Education</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Communications">Communications</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Law">Law</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Social Sciences / Liberal Arts" {% if 'Social Sciences / Liberal Arts' in categories.get('Discipline', []) %}checked{% endif %}>Social Sciences / Liberal Arts</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Science" {% if 'Science' in categories.get('Discipline', []) %}checked{% endif %}>Science</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Medicine / Health Sciences" {% if 'Medicine / Health Sciences' in categories.get('Discipline', []) %}checked{% endif %}>Medicine / Health Sciences</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Public Service" {% if 'Public Service' in categories.get('Discipline', []) %}checked{% endif %}>Public Service</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Technology" {% if 'Technology' in categories.get('Discipline', []) %}checked{% endif %}>Technology</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Creative Arts" {% if 'Creative Arts' in categories.get('Discipline', []) %}checked{% endif %}>Creative Arts</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Engineering" {% if 'Engineering' in categories.get('Discipline', []) %}checked{% endif %}>Engineering</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Business" {% if 'Business' in categories.get('Discipline', []) %}checked{% endif %}>Business</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="International Affairs" {% if 'International Affairs' in categories.get('Discipline', []) %}checked{% endif %}>International Affairs</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Education" {% if 'Education' in categories.get('Discipline', []) %}checked{% endif %}>Education</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Communications" {% if 'Communications' in categories.get('Discipline', []) %}checked{% endif %}>Communications</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Law" {% if 'Law' in categories.get('Discipline', []) %}checked{% endif %}>Law</label>
                         </div>
                     </div>
                 </div>
@@ -154,12 +159,12 @@
                     </div>
                     <div class="filter-options-container pl-6">
                         <div class="space-y-2 text-sm">
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="North America">North America</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Europe">Europe</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Asia">Asia</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Africa">Africa</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="South America">South America</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Oceania">Oceania</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="North America" {% if 'North America' in categories.get('Location', []) %}checked{% endif %}>North America</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Europe" {% if 'Europe' in categories.get('Location', []) %}checked{% endif %}>Europe</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Asia" {% if 'Asia' in categories.get('Location', []) %}checked{% endif %}>Asia</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Africa" {% if 'Africa' in categories.get('Location', []) %}checked{% endif %}>Africa</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="South America" {% if 'South America' in categories.get('Location', []) %}checked{% endif %}>South America</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Oceania" {% if 'Oceania' in categories.get('Location', []) %}checked{% endif %}>Oceania</label>
                         </div>
                     </div>
                 </div>
@@ -176,7 +181,7 @@
                             </div>
                         </div>
                     </h3>
-                    <input type="text" id="citizenship-input" placeholder="e.g. United States, Canada" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="text" id="citizenship-input" placeholder="e.g. United States, Canada" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" value="{{ categories.get('Citizenship Requirement', []) | join(', ') }}">
                 </div>
             </div>
 
@@ -194,16 +199,16 @@
                             </div>
                         </div>
                     </h3>
-                    <input type="text" id="residency-input" placeholder="e.g. United States, Canada" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="text" id="residency-input" placeholder="e.g. United States, Canada" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" value="{{ categories.get('Residency Requirement', []) | join(', ') }}">
                 </div>
 
                 <!-- Work Experience -->
                 <div data-category="Work Experience">
                     <h3 class="font-semibold text-gray-800 mb-3">Work Experience <span class="text-gray-400 font-normal">(3)</span></h3>
                     <div class="space-y-2 text-sm">
-                        <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Less than 5 years">Less than 5 years</label>
-                        <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="5 - 10 years">5 - 10 years</label>
-                        <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="10+ years">10+ years</label>
+                        <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Less than 5 years" {% if 'Less than 5 years' in categories.get('Work Experience', []) %}checked{% endif %}>Less than 5 years</label>
+                        <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="5 - 10 years" {% if '5 - 10 years' in categories.get('Work Experience', []) %}checked{% endif %}>5 - 10 years</label>
+                        <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="10+ years" {% if '10+ years' in categories.get('Work Experience', []) %}checked{% endif %}>10+ years</label>
                     </div>
                 </div>
 
@@ -211,9 +216,9 @@
                 <div data-category="Funding Type">
                     <h3 class="font-semibold text-gray-800 mb-3">Funding Type <span class="text-gray-400 font-normal">(3)</span></h3>
                     <div class="space-y-2 text-sm">
-                        <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Fully Funded">Fully Funded</label>
-                        <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Limited Awards">Limited Awards</label>
-                        <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="None">None</label>
+                        <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Fully Funded" {% if 'Fully Funded' in categories.get('Funding Type', []) %}checked{% endif %}>Fully Funded</label>
+                        <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Limited Awards" {% if 'Limited Awards' in categories.get('Funding Type', []) %}checked{% endif %}>Limited Awards</label>
+                        <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="None" {% if 'None' in categories.get('Funding Type', []) %}checked{% endif %}>None</label>
                     </div>
                 </div>
 
@@ -225,19 +230,19 @@
                     </div>
                     <div class="filter-options-container pl-6">
                         <div class="space-y-2 text-sm">
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Rolling/Multiple Deadlines">Rolling/Multiple Deadlines</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="January">January</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="February">February</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="March">March</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="April">April</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="May">May</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="June">June</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="July">July</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="August">August</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="September">September</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="October">October</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="November">November</label>
-                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="December">December</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Rolling/Multiple Deadlines" {% if 'Rolling/Multiple Deadlines' in categories.get('Deadline', []) %}checked{% endif %}>Rolling/Multiple Deadlines</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="January" {% if 'January' in categories.get('Deadline', []) %}checked{% endif %}>January</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="February" {% if 'February' in categories.get('Deadline', []) %}checked{% endif %}>February</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="March" {% if 'March' in categories.get('Deadline', []) %}checked{% endif %}>March</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="April" {% if 'April' in categories.get('Deadline', []) %}checked{% endif %}>April</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="May" {% if 'May' in categories.get('Deadline', []) %}checked{% endif %}>May</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="June" {% if 'June' in categories.get('Deadline', []) %}checked{% endif %}>June</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="July" {% if 'July' in categories.get('Deadline', []) %}checked{% endif %}>July</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="August" {% if 'August' in categories.get('Deadline', []) %}checked{% endif %}>August</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="September" {% if 'September' in categories.get('Deadline', []) %}checked{% endif %}>September</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="October" {% if 'October' in categories.get('Deadline', []) %}checked{% endif %}>October</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="November" {% if 'November' in categories.get('Deadline', []) %}checked{% endif %}>November</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="December" {% if 'December' in categories.get('Deadline', []) %}checked{% endif %}>December</label>
                         </div>
                     </div>
                 </div>
@@ -257,12 +262,12 @@
                         </h3>
                         <!-- Sliding Toggle for AND/OR -->
                         <div id="keyword-logic-container" class="relative flex items-center border border-gray-300 rounded-lg p-0.5 w-24 cursor-pointer">
-                            <div id="keyword-logic-slider" class="absolute top-0.5 left-0.5 h-[calc(100%-4px)] w-[calc(50%-2px)] bg-gray-800 rounded-md transition-transform duration-300 ease-in-out"></div>
-                            <button type="button" data-logic="AND" class="keyword-logic-btn selected flex-1 text-xs font-bold py-1 px-3 rounded-md relative z-10 transition-colors duration-300">AND</button>
-                            <button type="button" data-logic="OR" class="keyword-logic-btn flex-1 text-xs font-bold py-1 px-3 rounded-md relative z-10 transition-colors duration-300">OR</button>
+                            <div id="keyword-logic-slider" class="absolute top-0.5 left-0.5 h-[calc(100%-4px)] w-[calc(50%-2px)] bg-gray-800 rounded-md transition-transform duration-300 ease-in-out" style="transform: {% if keyword_logic == 'OR' %}translateX(calc(100% + 2px)){% else %}translateX(0%){% endif %};"></div>
+                            <button type="button" data-logic="AND" class="keyword-logic-btn {% if keyword_logic == 'AND' %}selected{% endif %} flex-1 text-xs font-bold py-1 px-3 rounded-md relative z-10 transition-colors duration-300">AND</button>
+                            <button type="button" data-logic="OR" class="keyword-logic-btn {% if keyword_logic == 'OR' %}selected{% endif %} flex-1 text-xs font-bold py-1 px-3 rounded-md relative z-10 transition-colors duration-300">OR</button>
                         </div>
                     </div>
-                    <input type="text" id="keywords-input" placeholder="e.g. research, data science" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="text" id="keywords-input" placeholder="e.g. research, data science" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" value="{{ (filters.get('keywords', {}).get('words', []) | join(', ')) }}">
                 </div>
             </div>
         </div>
@@ -273,7 +278,7 @@
              <p class="text-sm text-gray-600 max-w-3xl mx-auto text-center">
                 Please provide your interests in-depth. The fellowship information will be passed through API to a LLM. The LLM will give a rating that essentially determines whether it thinks you'd be interested or not. The more descriptive you are about your like and dislikes, the more accurate it will be.
              </p>
-             <textarea id="system-instructions-textarea" rows="4" class="mt-4 w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" placeholder="Describe your ideal fellowship, research interests, career goals, etc..."></textarea>
+             <textarea id="system-instructions-textarea" rows="4" class="mt-4 w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" placeholder="Describe your ideal fellowship, research interests, career goals, etc...">{{ filters.get('system_instructions', '') }}</textarea>
         </div>
 
         <!-- Footer: Search Button -->
@@ -467,6 +472,7 @@
 
             document.getElementById('begin-searching-btn').addEventListener('click', saveFilters);
 
+            // Keep this call for when /scrape is loaded directly as a page
             loadFilters();
         });
     </script>
