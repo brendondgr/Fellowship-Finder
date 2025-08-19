@@ -1,10 +1,12 @@
 import configparser
 import os
 import re
+import json
 import pandas as pd
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from tqdm import tqdm
+from utils.data_manager import format_deadline
 
 class DataProcessor:
     def __init__(self):
@@ -16,6 +18,44 @@ class DataProcessor:
         os.makedirs(self.processed_data_path, exist_ok=True)
         self.fellowship_csv_path = os.path.join(self.raw_data_path, "raw_fellowship_list.csv")
         self.processed_fellowship_csv_path = os.path.join(self.processed_data_path, "processed_fellowship_list.csv")
+        
+        # Load keywords from filters.json
+        self.configs_path = config.get('PATHS', 'configs', fallback='configs/')
+        filters_path = os.path.join(self.configs_path, "filters.json")
+        with open(filters_path, "r") as f:
+            filters_data = json.load(f)
+            self.keywords_config = filters_data.get("keywords", {})
+
+    def _passes_keyword_filter(self, title, description):
+        """Checks if the fellowship passes the keyword filter from filters.json."""
+        keyword_type = self.keywords_config.get("type", "OR").upper()
+        words = self.keywords_config.get("words", [])
+
+        if not words:
+            return True  # No keywords to filter by
+
+        # Combine title and description for searching
+        text_to_search = f"{title.lower()} {description.lower() if description else ''}"
+        
+        lower_words = [word.lower() for word in words]
+
+        if keyword_type == "AND":
+            if all(word in text_to_search for word in lower_words):
+                print(f"Fellowship '{title}' passed AND filter.")
+                return True
+            else:
+                print(f"Fellowship '{title}' failed AND filter.")
+                return False
+        elif keyword_type == "OR":
+            if any(word in text_to_search for word in lower_words):
+                print(f"Fellowship '{title}' passed OR filter.")
+                return True
+            else:
+                print(f"Fellowship '{title}' failed OR filter.")
+                return False
+        
+        return True # Default to passing if type is not AND/OR
+
 
     def process_fellowships(self, fellowship_elements):
         print(f"Processing {len(fellowship_elements)} fellowship elements.")
@@ -71,12 +111,18 @@ class DataProcessor:
                 except NoSuchElementException:
                     description = None
 
-
+                # Keyword Filtering
+                if not self._passes_keyword_filter(title, description):
+                    continue
+                
+                # Format the deadline
+                formatted_deadline = format_deadline(deadline)
+                
                 new_fellowships.append({
                     'title': title,
                     'location': location,
                     'continent': continent,
-                    'deadline': deadline,
+                    'deadline': formatted_deadline,
                     'link': link,
                     'description': description,
                     'processed': 'no'
@@ -122,14 +168,17 @@ class DataProcessor:
         
         # Wrap the loop with tqdm for a progress bar
         for index, row in tqdm(unprocessed_df.iterrows(), total=unprocessed_df.shape[0], desc="Refining Fellowships"):
-            # print(f"Refining row {index + 2}: {row['title']}") # Now handled by tqdm
             try:
                 refined_data = refiner.refine(row)
                 if refined_data:
-                    cleaned_data = self._clean_and_validate_refined_data(refined_data)
+                    # Combine raw data with refined data
+                    combined_data = row.to_dict()
+                    combined_data.update(refined_data)
+                    
+                    # Clean and validate the combined data
+                    cleaned_data = self._clean_and_validate_refined_data(combined_data)
+                    
                     if cleaned_data:
-                        print("\nCleaned and validated data:")
-                        print(cleaned_data)
                         refined_data_list.append(cleaned_data)
                         raw_df.loc[index, 'processed'] = 'yes'
             except Exception as e:
@@ -155,7 +204,7 @@ class DataProcessor:
         required_keys = {
             "title": str, "location": str, "continent": str,
             "deadline": str, "link": str, "description": str,
-            "subjects": list, "total_compensation": str,
+            "subjects": list, "total_compensation": str, "other_funding": str,
             "length_in_years": int, "interest_rating": float
         }
 
@@ -165,10 +214,14 @@ class DataProcessor:
                 print(f"Missing key in refined data: {key}")
                 return None
 
+        # Add 'favorited' and 'show' if they are missing
+        data.setdefault('favorited', 0)
+        data.setdefault('show', 1)
+
         # Clean and validate data types
         try:
             # String fields
-            for key in ["title", "location", "continent", "link", "description"]:
+            for key in ["title", "location", "continent", "link", "description", "other_funding"]:
                 data[key] = str(data[key])
 
             # Deadline: should be in YYYY-MM format
@@ -199,6 +252,10 @@ class DataProcessor:
             # Interest rating: should be a float
             rating = data.get("interest_rating")
             data["interest_rating"] = float(rating)
+
+            # Favorited and show: should be integers
+            data['favorited'] = int(data.get('favorited', 0))
+            data['show'] = int(data.get('show', 1))
 
         except (ValueError, TypeError) as e:
             print(f"Data validation error: {e}")

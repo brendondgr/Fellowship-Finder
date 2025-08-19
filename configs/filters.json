@@ -1,0 +1,43 @@
+{
+    "Browsing": "firefox",
+    "categories": {
+        "Fellowship Type": [
+            "Masters Fellowships",
+            "Doctoral Fellowships",
+            "Summer Fellowships"
+        ],
+        "Discipline": [
+            "Science",
+            "Medicine / Health Sciences",
+            "Technology",
+            "Engineering"
+        ],
+        "Location": [
+            "North America"
+        ],
+        "Citizenship Requirement": [
+            "Any",
+            "United States"
+        ],
+        "Residency Requirement": [
+            "Any",
+            "United States"
+        ],
+        "Work Experience": [
+        
+        ],
+        "Funding Type": [
+            "Fully Funded"
+        ],
+        "Deadline": [
+
+        ]
+    },
+    "keywords": {
+        "type": "AND",
+        "words": [
+            
+        ]
+    },
+    "system_instructions": ""
+}

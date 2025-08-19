@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filter Selection Layout</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom styles for tooltips */
+        .group:hover .group-hover\:opacity-100 {
+            opacity: 1;
+        }
+        /* Base selected state for buttons */
+        .browser-btn.selected {
+            color: white;
+        }
+        /* Browser-specific colors */
+        .browser-btn[data-browser="chrome"].selected {
+            background-color: #4285F4;
+            border-color: #4285F4;
+        }
+        .browser-btn[data-browser="firefox"].selected {
+            background-color: #FF7139;
+            border-color: #FF7139;
+        }
+        .browser-btn[data-browser="safari"].selected {
+            background-color: #00A1E1;
+            border-color: #00A1E1;
+        }
+        .browser-btn[data-browser="edge"].selected {
+            background-color: #0078D7;
+            border-color: #0078D7;
+        }
+        /* Keyword logic button text color */
+        .keyword-logic-btn.selected {
+            color: white;
+        }
+        .keyword-logic-btn {
+            color: #6b7280; /* gray-500 */
+        }
+        /* Styles for collapsible sections */
+        .filter-options-container {
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .toggle-icon {
+            transition: transform 0.3s ease-in-out;
+        }
+        .collapsible-section.expanded .toggle-icon {
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body class="bg-white">
+
+    <!-- Main Page Content Container -->
+    <div class="p-6 sm:p-8 w-full max-w-5xl mx-auto">
+
+        <!-- Main Header and Description -->
+        <div class="text-center mb-8">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">ProFellow Website Scraping</h1>
+            <p class="mt-2 text-sm text-gray-600 max-w-3xl mx-auto">
+                Below are a list of options available on the ProFellow website. Select which ones apply to you. Options may be pre-selected based on your previous choices if you have utilized this tool before. Otherwise, please select items in each category. If you leave a category blank, then this category will be skipped.
+            </p>
+        </div>
+        
+        <!-- Section Boundary -->
+        <hr class="my-8 border-gray-200">
+
+        <!-- Browser and API Key Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8 mb-8">
+            <!-- Browser Type -->
+            <div>
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Browser Type</h2>
+                <div class="flex flex-wrap gap-2 sm:gap-4">
+                    <button data-browser="chrome" class="browser-btn selected flex-grow sm:flex-grow-0 text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 hover:opacity-80 transition-all duration-200">Chrome</button>
+                    <button data-browser="firefox" class="browser-btn flex-grow sm:flex-grow-0 text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 text-gray-600 hover:opacity-80 transition-all duration-200">Firefox</button>
+                    <button data-browser="safari" class="browser-btn flex-grow sm:flex-grow-0 text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 text-gray-600 hover:opacity-80 transition-all duration-200">Safari</button>
+                    <button data-browser="edge" class="browser-btn flex-grow sm:flex-grow-0 text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 text-gray-600 hover:opacity-80 transition-all duration-200">Edge</button>
+                </div>
+            </div>
+            <!-- Gemini API Key -->
+            <div>
+                 <h2 class="text-lg font-semibold text-gray-800 mb-4">Gemini API Key</h2>
+                 <input type="password" placeholder="Enter your API key" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+        </div>
+
+        <!-- Section Boundary -->
+        <hr class="my-8 border-gray-200">
+
+        <!-- Filters Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
+
+            <!-- Column 1 -->
+            <div class="space-y-6">
+                <!-- Fellowship Type -->
+                <div class="collapsible-section" data-category="Fellowship Type">
+                    <div class="collapsible-header flex items-center mb-3 cursor-pointer">
+                        <svg class="toggle-icon h-4 w-4 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        <h3 class="font-semibold text-gray-800 select-none">Fellowship Type <span class="text-gray-400 font-normal">(9)</span></h3>
+                    </div>
+                    <div class="filter-options-container pl-6">
+                        <div class="space-y-2 text-sm">
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Professional Fellowships">Professional Fellowships</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Doctoral Programs">Doctoral Programs</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Masters Programs">Masters Programs</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Post-doctoral Fellowships">Post-doctoral Fellowships</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Masters Fellowships">Masters Fellowships</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Doctoral Fellowships">Doctoral Fellowships</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Undergraduate Fellowships">Undergraduate Fellowships</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Summer Fellowships">Summer Fellowships</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Business Accelerators">Business Accelerators</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Discipline -->
+                <div class="collapsible-section" data-category="Discipline">
+                    <div class="collapsible-header flex items-center mb-3 cursor-pointer">
+                        <svg class="toggle-icon h-4 w-4 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        <h3 class="font-semibold text-gray-800 select-none">Discipline <span class="text-gray-400 font-normal">(12)</span></h3>
+                    </div>
+                    <div class="filter-options-container pl-6">
+                        <div class="space-y-2 text-sm">
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Social Sciences / Liberal Arts">Social Sciences / Liberal Arts</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Science">Science</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Medicine / Health Sciences">Medicine / Health Sciences</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Public Service">Public Service</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Technology">Technology</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Creative Arts">Creative Arts</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Engineering">Engineering</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Business">Business</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="International Affairs">International Affairs</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Education">Education</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Communications">Communications</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Law">Law</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location -->
+                 <div class="collapsible-section" data-category="Location">
+                    <div class="collapsible-header flex items-center mb-3 cursor-pointer">
+                        <svg class="toggle-icon h-4 w-4 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        <h3 class="font-semibold text-gray-800 select-none">Location <span class="text-gray-400 font-normal">(6)</span></h3>
+                    </div>
+                    <div class="filter-options-container pl-6">
+                        <div class="space-y-2 text-sm">
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="North America">North America</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Europe">Europe</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Asia">Asia</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Africa">Africa</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="South America">South America</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Oceania">Oceania</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Citizenship Requirements -->
+                <div data-category="Citizenship Requirement">
+                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center">
+                        Citizenship Requirements
+                        <div class="group relative ml-2">
+                            <i class="fa-solid fa-circle-info text-gray-400"></i>
+                            <div class="absolute bottom-full mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg py-2 px-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                Type your required citizenship(s). Separate multiple entries with a comma (e.g., "United States, Canada"). This is case-insensitive.
+                                <svg class="absolute text-gray-800 h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                            </div>
+                        </div>
+                    </h3>
+                    <input type="text" id="citizenship-input" placeholder="e.g. United States, Canada" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+            </div>
+
+            <!-- Column 2 -->
+            <div class="space-y-6">
+                <!-- Residency Requirements -->
+                <div data-category="Residency Requirement">
+                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center">
+                        Residency Requirements
+                        <div class="group relative ml-2">
+                            <i class="fa-solid fa-circle-info text-gray-400"></i>
+                            <div class="absolute bottom-full mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg py-2 px-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                Type your required country of residency. Separate multiple entries with a comma (e.g., "United States, Canada"). This is case-insensitive.
+                                <svg class="absolute text-gray-800 h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                            </div>
+                        </div>
+                    </h3>
+                    <input type="text" id="residency-input" placeholder="e.g. United States, Canada" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+
+                <!-- Work Experience -->
+                <div data-category="Work Experience">
+                    <h3 class="font-semibold text-gray-800 mb-3">Work Experience <span class="text-gray-400 font-normal">(3)</span></h3>
+                    <div class="space-y-2 text-sm">
+                        <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Less than 5 years">Less than 5 years</label>
+                        <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="5 - 10 years">5 - 10 years</label>
+                        <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="10+ years">10+ years</label>
+                    </div>
+                </div>
+
+                <!-- Funding Type -->
+                <div data-category="Funding Type">
+                    <h3 class="font-semibold text-gray-800 mb-3">Funding Type <span class="text-gray-400 font-normal">(3)</span></h3>
+                    <div class="space-y-2 text-sm">
+                        <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Fully Funded">Fully Funded</label>
+                        <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Limited Awards">Limited Awards</label>
+                        <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="None">None</label>
+                    </div>
+                </div>
+
+                <!-- Deadline -->
+                <div class="collapsible-section" data-category="Deadline">
+                    <div class="collapsible-header flex items-center mb-3 cursor-pointer">
+                        <svg class="toggle-icon h-4 w-4 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        <h3 class="font-semibold text-gray-800 select-none">Deadline <span class="text-gray-400 font-normal">(13)</span></h3>
+                    </div>
+                    <div class="filter-options-container pl-6">
+                        <div class="space-y-2 text-sm">
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="Rolling/Multiple Deadlines">Rolling/Multiple Deadlines</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="January">January</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="February">February</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="March">March</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="April">April</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="May">May</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="June">June</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="July">July</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="August">August</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="September">September</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="October">October</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="November">November</label>
+                            <label class="flex items-center text-gray-600"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" value="December">December</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Words -->
+                <div data-category="keywords">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-semibold text-gray-800 flex items-center">
+                            Key Words
+                            <div class="group relative ml-2">
+                                <i class="fa-solid fa-circle-info text-gray-400"></i>
+                                <div class="absolute bottom-full mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg py-2 px-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                    Key Words. If a Fellowship has these keywords, it will not be present in the final fellowship list.
+                                    <svg class="absolute text-gray-800 h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                                </div>
+                            </div>
+                        </h3>
+                        <!-- Sliding Toggle for AND/OR -->
+                        <div id="keyword-logic-container" class="relative flex items-center border border-gray-300 rounded-lg p-0.5 w-24 cursor-pointer">
+                            <div id="keyword-logic-slider" class="absolute top-0.5 left-0.5 h-[calc(100%-4px)] w-[calc(50%-2px)] bg-gray-800 rounded-md transition-transform duration-300 ease-in-out"></div>
+                            <button type="button" data-logic="AND" class="keyword-logic-btn selected flex-1 text-xs font-bold py-1 px-3 rounded-md relative z-10 transition-colors duration-300">AND</button>
+                            <button type="button" data-logic="OR" class="keyword-logic-btn flex-1 text-xs font-bold py-1 px-3 rounded-md relative z-10 transition-colors duration-300">OR</button>
+                        </div>
+                    </div>
+                    <input type="text" id="keywords-input" placeholder="e.g. research, data science" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+            </div>
+        </div>
+
+        <!-- System Instructions Section -->
+        <div class="mt-8 pt-8 border-t border-gray-200" data-category="system_instructions">
+             <h2 class="text-lg font-semibold text-gray-800 mb-4 text-center">System Instructions</h2>
+             <p class="text-sm text-gray-600 max-w-3xl mx-auto text-center">
+                Please provide your interests in-depth. The fellowship information will be passed through API to a LLM. The LLM will give a rating that essentially determines whether it thinks you'd be interested or not. The more descriptive you are about your like and dislikes, the more accurate it will be.
+             </p>
+             <textarea id="system-instructions-textarea" rows="4" class="mt-4 w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" placeholder="Describe your ideal fellowship, research interests, career goals, etc..."></textarea>
+        </div>
+
+        <!-- Footer: Search Button -->
+        <div class="mt-8 pt-8 border-t border-gray-200 flex justify-center">
+            <button id="begin-searching-btn" class="w-full sm:w-auto bg-indigo-600 text-white font-bold py-3 px-12 rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                Begin Searching
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Browser Button Selection ---
+            const browserButtons = document.querySelectorAll('.browser-btn');
+            browserButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    browserButtons.forEach(btn => {
+                        btn.classList.remove('selected');
+                        btn.classList.add('text-gray-600');
+                    });
+                    button.classList.add('selected');
+                    button.classList.remove('text-gray-600');
+                });
+            });
+
+            // --- Keyword Logic Sliding Toggle ---
+            const keywordLogicSlider = document.getElementById('keyword-logic-slider');
+            const keywordLogicButtons = document.querySelectorAll('.keyword-logic-btn');
+            keywordLogicButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    keywordLogicButtons.forEach(btn => btn.classList.remove('selected'));
+                    button.classList.add('selected');
+                    if (button.dataset.logic === 'OR') {
+                        keywordLogicSlider.style.transform = 'translateX(calc(100% + 2px))';
+                    } else {
+                        keywordLogicSlider.style.transform = 'translateX(0%)';
+                    }
+                });
+            });
+
+            // --- Collapsible Section Logic ---
+            const collapsibleSections = document.querySelectorAll('.collapsible-section');
+            collapsibleSections.forEach(section => {
+                const header = section.querySelector('.collapsible-header');
+                const optionsContainer = section.querySelector('.filter-options-container');
+                const options = optionsContainer.querySelector('.space-y-2');
+                const allItems = options.querySelectorAll('label');
+                
+                if (allItems.length > 3) {
+                    // Calculate initial collapsed height (for 3 items)
+                    let initialHeight = 0;
+                    for(let i = 0; i < 3; i++) {
+                        initialHeight += allItems[i].offsetHeight;
+                    }
+                    const style = window.getComputedStyle(options);
+                    const gap = parseFloat(style.gap) || (parseFloat(style.getPropertyValue('margin-top')) * 2) || 8;
+                    initialHeight += gap * 2;
+
+                    optionsContainer.style.maxHeight = `${initialHeight}px`;
+
+                    header.addEventListener('click', () => {
+                        section.classList.toggle('expanded');
+                        if (section.classList.contains('expanded')) {
+                            optionsContainer.style.maxHeight = `${options.scrollHeight}px`;
+                        } else {
+                            optionsContainer.style.maxHeight = `${initialHeight}px`;
+                        }
+                    });
+                } else {
+                    // If 3 or fewer items, remove the toggle icon and functionality
+                    header.querySelector('.toggle-icon').style.display = 'none';
+                    header.style.cursor = 'default';
+                    optionsContainer.style.maxHeight = `${options.scrollHeight}px`;
+                }
+            });
+
+            // --- Load and Save Filters ---
+            const loadFilters = async () => {
+                try {
+                    const response = await fetch('/api/filters');
+                    if (!response.ok) {
+                        throw new Error('Failed to load filters');
+                    }
+                    const filters = await response.json();
+
+                    // Set browser
+                    document.querySelectorAll('.browser-btn').forEach(btn => {
+                        btn.classList.remove('selected', 'text-gray-600');
+                        if (btn.dataset.browser === filters.Browsing) {
+                            btn.classList.add('selected');
+                        } else {
+                            btn.classList.add('text-gray-600');
+                        }
+                    });
+
+                    // Set categories
+                    for (const category in filters.categories) {
+                        const values = filters.categories[category];
+                        const container = document.querySelector(`[data-category="${category}"]`);
+                        if (!container) {
+                            console.warn(`Container for category "${category}" not found.`);
+                            continue;
+                        }
+
+                        if (category === 'Citizenship Requirement' || category === 'Residency Requirement') {
+                            container.querySelector('input').value = values.join(', ');
+                        } else {
+                            container.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                                if (values.includes(checkbox.value)) {
+                                    checkbox.checked = true;
+                                }
+                            });
+                        }
+                    }
+
+                    // Set keywords
+                    document.getElementById('keywords-input').value = filters.keywords.words.join(', ');
+                    const logic = filters.keywords.type.toUpperCase();
+                    document.querySelectorAll('.keyword-logic-btn').forEach(btn => {
+                        btn.classList.remove('selected');
+                        if (btn.dataset.logic === logic) {
+                            btn.classList.add('selected');
+                            const slider = document.getElementById('keyword-logic-slider');
+                            if (logic === 'OR') {
+                                slider.style.transform = 'translateX(calc(100% + 2px))';
+                            } else {
+                                slider.style.transform = 'translateX(0%)';
+                            }
+                        }
+                    });
+
+                    // Set system instructions
+                    document.getElementById('system-instructions-textarea').value = filters.system_instructions;
+
+                } catch (error) {
+                    console.error('Error loading filters:', error);
+                }
+            };
+
+            const saveFilters = async () => {
+                const filtersToSave = {
+                    Browsing: document.querySelector('.browser-btn.selected').dataset.browser,
+                    categories: {},
+                    keywords: {
+                        type: document.querySelector('.keyword-logic-btn.selected').dataset.logic,
+                        words: document.getElementById('keywords-input').value.split(',').map(s => s.trim()).filter(Boolean)
+                    },
+                    system_instructions: document.getElementById('system-instructions-textarea').value
+                };
+
+                document.querySelectorAll('[data-category]').forEach(container => {
+                    const category = container.dataset.category;
+                    if (category === 'keywords' || category === 'system_instructions') return;
+
+                    if (category === 'Citizenship Requirement' || category === 'Residency Requirement') {
+                        filtersToSave.categories[category] = container.querySelector('input').value.split(',').map(s => s.trim()).filter(Boolean);
+                    } else {
+                        const selected = [];
+                        container.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+                            selected.push(checkbox.value);
+                        });
+                        filtersToSave.categories[category] = selected;
+                    }
+                });
+
+                try {
+                    const response = await fetch('/api/filters', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(filtersToSave, null, 4)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to save filters');
+                    }
+
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('Filters saved successfully!');
+                    } else {
+                        alert('Error saving filters: ' + result.error);
+                    }
+                } catch (error) {
+                    console.error('Error saving filters:', error);
+                    alert('An error occurred while saving filters.');
+                }
+            };
+
+            document.getElementById('begin-searching-btn').addEventListener('click', saveFilters);
+
+            loadFilters();
+        });
+    </script>
+
+</body>
+</html>

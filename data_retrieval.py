@@ -33,7 +33,6 @@ def main():
         file_manager.clear_data_folder()
 
     if args.refine:
-        print("Starting the refinement process...")
         data_processor = DataProcessor()
         
         # Check if the raw data file exists
@@ -44,7 +43,6 @@ def main():
 
         refiner = GeminiRefiner()
         data_processor.refine_and_save_fellowships(refiner)
-        print("Refinement process finished.")
     else:
         # Determine the browser to use
         browser = args.browser if args.browser else config.get('SETTINGS', 'browser', fallback='firefox')
@@ -55,7 +53,6 @@ def main():
                 config.set('SETTINGS', 'browser', args.browser.lower())
                 with open('config.ini', 'w') as configfile:
                     config.write(configfile)
-                print(f"Browser setting updated to '{args.browser.lower()}' in config.ini")
 
         # --- Bot Execution ---
         bot = ProfellowBot(browser=browser)

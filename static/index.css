@@ -22,3 +22,30 @@ body {
     fill: #ef4444; /* red-500 */
     color: #ef4444; /* red-500 */
 }
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Styling for the Scrape Modal */
+#scrape-modal {
+    background-color: rgba(0, 0, 0, 0.7); /* Dark overlay */
+    overflow-y: auto; /* Enable scrolling for the modal itself */
+    padding: 20px; /* Add some padding around the content */
+}
+
+#scrape-modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 90%; /* Adjust based on preference */
+    max-height: 90vh; /* Limit height to viewport height */
+    overflow-y: auto; /* Enable scrolling for content if it exceeds max-height */
+    margin: auto; /* Center the modal content */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}

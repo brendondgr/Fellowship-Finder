@@ -33,13 +33,17 @@ class GeminiRefiner:
             api_key=gemini_api_key
         )
         
-        self.interests = f"""
-I am currently interested in the applications of Artificial Intelligence and Machine Learning to the field of Medicine. I am currently researching Robotic Surgery and the applications, limitations and opportunities of this in the field. I am a PhD Student studying Scientific Computing and Computational Science. I have a Biochemistry BS.
-
-Generally, I am interested in any forms of technology, science, robotics, and medicine.
-
-I am a male US Citizen, and I am currently living in the United States. I am also of Hispanic ethnicity.
-"""
+        # Load system instructions from filters.json
+        filters_path = 'configs/filters.json'
+        if not os.path.exists(filters_path):
+            raise FileNotFoundError(f"Filters file not found at {filters_path}. Please create it.")
+        
+        with open(filters_path, 'r') as f:
+            filters_data = json.load(f)
+            self.system_instructions = filters_data.get('system_instructions', '')
+            if not self.system_instructions:
+                print("Warning: `system_instructions` not found or empty in `configs/filters.json`")
+                
     def refine(self, row):
         if self.rate_limit_interval > 0:
             current_time = time.time()
@@ -59,31 +63,19 @@ The following is a fellowship opportunity:
 
 I am looking for you to extract information about the fellowship, and provide me a summary of the fellowship, by returning a JSON Object in the following format:```json
 {{
-    "title": "string",
-    "location": "string",
-    "continent": "string",
-    "deadline": "string in format YYYY-MM",
-    "link": "string",
-    "description": "string", 
-    "subjects": ["string", "string", "string"], 
-    "total_compensation": "$string",
+    "total_compensation": "string", 
+    "other_funding": "string",
+    "subjects": ["string", "string", "string"],
     "length_in_years": int,
     "interest_rating": float
 }}
 ```
 Subjects should be a list of strings, and should be "science", "medicine", "technology", "engineering", "arts", "social sciences", etc. Not "Minorities", "Full Funding", etc.
 
-The month is August, 2025. For the deadline, it may say something along the lines of "December". If we have not past December, then the deadline should be this December, 2025. If it is January, since we are in August and January is in the future, then the deadline should be this January, 2026.
+"total_compensation" should be a monetary value. If it is $25,000 for 3 years, then the total should be $75,000. If not specified, please write "N/A" instead. "other_funding" should be a string separated by commas, that tells what other funding is available.
 
-For funding, please return the total amount of funding. If it is a $25,000 annual Stipend + Others for 2 years, please phrase it as "$50,000 + Other".
-
-Interest rating should be a float between 1.0 and 3.0, which is based on the following criteria:
-- 1: I qualify based on my Citizenship, Residency and Background, specifically the subject I have studied and what I am currently studying.
-- 2: The fellowship is correlated with what I am interested in. If it has some overlap, this rating added should be 0.5, instead of 1.0.
-- 3: The fellowship covers at least a single year.
-
-My interests are, which should sway how you decide #2, are:
-{self.interests}
+Interest rating should be a float between 1.0 and 3.0, which is based on your opinion of my interest in the fellowship based on the following information about me:
+{self.system_instructions}
 
 You should return a single JSON Object containing the information for the fellowship. Also if any subcategory of the fellowship is not clear, you should return a "NA" for that subcategory.
 """
@@ -123,8 +115,6 @@ You should return a single JSON Object containing the information for the fellow
             return json.loads(json_str)
         except (json.JSONDecodeError, IndexError) as e:
             print(f"Error parsing JSON: {e}")
-            print("Raw response text:")
-            print(response_text)
             return None
 
     def _format_fellowship(self, row):

@@ -41,8 +41,8 @@ class ProfellowBot:
             self.login_data = json.load(f)
 
         # Load categories and items to be selected from a JSON file
-        with open(os.path.join(self.configs_path, "categories.json"), "r") as f:
-            self.categories_data = json.load(f)
+        with open(os.path.join(self.configs_path, "filters.json"), "r") as f:
+            self.categories_data = json.load(f)["categories"]
 
         self.LOGIN_URL = "https://www.profellow.com/log-in/"
 
@@ -60,32 +60,32 @@ class ProfellowBot:
             raise ValueError(f"Unsupported browser: '{self.browser}'. Please choose 'firefox' or 'chrome'.")
         
     def _are_categories_same(self):
-        """Deep compares the categories.json files in configs/ and tmp/."""
-        config_cat_path = os.path.join(self.configs_path, "categories.json")
-        tmp_cat_path = os.path.join(self.tmp_path, "categories.json")
+        """Deep compares the filters.json files in configs/ and tmp/."""
+        config_cat_path = os.path.join(self.configs_path, "filters.json")
+        tmp_cat_path = os.path.join(self.tmp_path, "filters.json")
 
         if not os.path.exists(tmp_cat_path):
-            print("tmp/categories.json does not exist.")
+            print("tmp/filters.json does not exist.")
             return False
 
         try:
             with open(config_cat_path, 'r') as f1, open(tmp_cat_path, 'r') as f2:
-                config_data = json.load(f1)
-                tmp_data = json.load(f2)
+                config_data = json.load(f1)["categories"]
+                tmp_data = json.load(f2)["categories"]
 
             if config_data.keys() != tmp_data.keys():
-                print("Keys in categories.json files do not match.")
+                print("Keys in filters.json files do not match.")
                 return False
 
             for key in config_data:
                 if sorted(config_data[key]) != sorted(tmp_data[key]):
-                    print(f"Mismatch found in key '{key}' between categories.json files.")
+                    print(f"Mismatch found in key '{key}' between filters.json files.")
                     return False
             
-            print("categories.json files in configs/ and tmp/ are identical.")
+            print("filters.json files in configs/ and tmp/ are identical.")
             return True
         except (FileNotFoundError, json.JSONDecodeError) as e:
-            print(f"Error comparing categories.json files: {e}")
+            print(f"Error comparing filters.json files: {e}")
             return False
 
     def _get_cached_link(self):
@@ -166,7 +166,7 @@ class ProfellowBot:
 
         for i, block in enumerate(filter_blocks):
             if i >= len(category_keys):
-                print(f"Warning: No category key in categories.json for filter block {i+1}. Skipping.")
+                print(f"Warning: No category key in filters.json for filter block {i+1}. Skipping.")
                 continue
             
             category_key = category_keys[i]
@@ -298,16 +298,16 @@ class ProfellowBot:
             print(" 'Done' button not found.")
 
     def _cache_results(self):
-        """Saves the current URL and copies categories.json to tmp/."""
+        """Saves the current URL and copies filters.json to tmp/."""
         # Save the current URL
         link_path = os.path.join(self.tmp_path, "link.txt")
         with open(link_path, 'w') as f:
             f.write(self.driver.current_url)
         print(f"Saved current URL to {link_path}")
 
-        # Copy categories.json from configs to tmp
-        config_cat_path = os.path.join(self.configs_path, "categories.json")
-        tmp_cat_path = os.path.join(self.tmp_path, "categories.json")
+        # Copy filters.json from configs to tmp
+        config_cat_path = os.path.join(self.configs_path, "filters.json")
+        tmp_cat_path = os.path.join(self.tmp_path, "filters.json")
         try:
             with open(config_cat_path, 'r') as src, open(tmp_cat_path, 'w') as dst:
                 dst.write(src.read())

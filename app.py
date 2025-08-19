@@ -4,6 +4,7 @@ import ast
 import pandas as pd
 import subprocess
 import sys
+import json
 
 app = Flask(__name__)
 data_manager = DataManager()
@@ -97,8 +98,35 @@ def get_status():
         "message": "Processed fellowship data is available." if data_manager.data_available else "Processed fellowship data not found. Please process the raw data."
     })
 
-@app.route('/scrape', methods=['POST'])
+@app.route('/api/filters', methods=['GET', 'POST'])
+def manage_filters():
+    filters_path = 'configs/filters.json'
+    if request.method == 'GET':
+        try:
+            with open(filters_path, 'r') as f:
+                filters = json.load(f)
+            print("Loaded filters from JSON:", json.dumps(filters, indent=2))
+            return jsonify(filters)
+        except FileNotFoundError:
+            return jsonify({"error": "Filters file not found."}), 404
+        except json.JSONDecodeError:
+            return jsonify({"error": "Error decoding filters file."}), 500
+
+    if request.method == 'POST':
+        try:
+            new_filters = request.json
+            print("Saving filters to JSON:", json.dumps(new_filters, indent=2))
+            with open(filters_path, 'w') as f:
+                json.dump(new_filters, f, indent=4)
+            return jsonify({"success": True, "message": "Filters saved successfully."})
+        except Exception as e:
+            return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/scrape', methods=['GET', 'POST'])
 def scrape():
+    if request.method == 'GET':
+        return render_template('scrape.html')
+    
     data = request.get_json()
     cleanup = data.get('cleanup', False)
     browser = data.get('browser', 'firefox')

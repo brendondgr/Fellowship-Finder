@@ -1,6 +1,7 @@
 import configparser
 import os
 import pandas as pd
+from datetime import datetime
 
 class DataManager:
     def __init__(self):
@@ -126,3 +127,38 @@ class DataManager:
             return False
         except (ValueError, TypeError):
             return False
+
+def format_deadline(deadline_text):
+    """
+    Formats the deadline string to include the correct year.
+
+    Args:
+        deadline_text (str): The raw deadline text (e.g., "August", "Rolling").
+
+    Returns:
+        str: The formatted deadline string (e.g., "August, 2024", "Rolling").
+    """
+    if not deadline_text or "rolling" in deadline_text.lower():
+        return deadline_text
+
+    try:
+        # Get current month and year
+        now = datetime.now()
+        current_month = now.month
+        current_year = now.year
+
+        # Parse the deadline month
+        deadline_month_str = deadline_text.split()[0]
+        deadline_datetime = datetime.strptime(deadline_month_str, "%B")
+        deadline_month = deadline_datetime.month
+
+        # Determine the year
+        if deadline_month >= current_month:
+            year = current_year
+        else:
+            year = current_year + 1
+
+        return f"{deadline_month_str}, {year}"
+    except ValueError:
+        # If parsing fails, return the original text
+        return deadline_text

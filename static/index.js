@@ -51,13 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- New elements for scrape and process ---
     const scrapeBtn = document.getElementById('scrape-btn');
-    const processBtn = document.getElementById('process-btn');
-    const scrapeModalCleanup = document.getElementById('scrape-modal-cleanup');
-    const scrapeModalBrowser = document.getElementById('scrape-modal-browser');
-    const cleanupYes = document.getElementById('cleanup-yes');
-    const cleanupNo = document.getElementById('cleanup-no');
-    const browserChrome = document.getElementById('browser-chrome');
-    const browserFirefox = document.getElementById('browser-firefox');
+    const scrapeModal = document.getElementById('scrape-modal');
+    const scrapeModalContent = document.getElementById('scrape-modal-content');
     const notificationContainer = document.getElementById('notification-container');
     const notificationMessage = document.getElementById('notification-message');
     
@@ -72,8 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if(refreshBtn) {
+        const refreshIcon = refreshBtn.querySelector('img'); // Define refreshIcon here
         refreshBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            refreshIcon.classList.add('spin'); // Add spin class on click
             showNotification('Refreshing data...');
             
             fetch('/api/refresh', { method: 'POST' })
@@ -91,94 +88,113 @@ document.addEventListener('DOMContentLoaded', () => {
                 .catch(error => {
                     console.error('Error refreshing data:', error);
                     showNotification('Error refreshing data.', true);
+                })
+                .finally(() => {
+                    refreshIcon.classList.remove('spin'); // Remove spin class after fetch
                 });
         });
     }
 
-    // --- Scrape and Process Button Event Listeners ---
     if(scrapeBtn) {
-        scrapeBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            scrapeModalCleanup.classList.remove('hidden');
-        });
-    }
+        scrapeBtn.addEventListener('click', () => {
+            // Load content from scrape.html
+            fetch('/scrape')
+                .then(response => response.text())
+                .then(html => {
+                    scrapeModalContent.innerHTML = html;
+                    scrapeModal.classList.remove('hidden');
+                    scrapeModal.classList.add('flex'); // Use flex to center the modal content
+                    
+                    // Manually execute the script content from scrape.js
+                    const scriptElement = document.createElement('script');
+                    scriptElement.textContent = `
+                        // --- Browser Button Selection ---
+                        const browserButtons = document.querySelectorAll('.browser-btn');
+                        browserButtons.forEach(button => {
+                            button.addEventListener('click', () => {
+                                browserButtons.forEach(btn => {
+                                    btn.classList.remove('selected');
+                                    btn.classList.add('text-gray-600');
+                                });
+                                button.classList.add('selected');
+                                button.classList.remove('text-gray-600');
+                            });
+                        });
 
-    if(processBtn) {
-        processBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            showNotification('Processing data...');
-            fetch('/process', { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    if(data.success) {
-                        showNotification('Data processed successfully! Reloading...');
-                        setTimeout(() => window.location.reload(), 2000);
-                    } else {
-                        showNotification(data.error || 'An unknown error occurred.', true);
-                    }
+                        // --- Keyword Logic Sliding Toggle ---
+                        const keywordLogicSlider = document.getElementById('keyword-logic-slider');
+                        const keywordLogicButtons = document.querySelectorAll('.keyword-logic-btn');
+                        if (keywordLogicSlider && keywordLogicButtons.length) {
+                            keywordLogicButtons.forEach(button => {
+                                button.addEventListener('click', () => {
+                                    keywordLogicButtons.forEach(btn => btn.classList.remove('selected'));
+                                    button.classList.add('selected');
+                                    if (button.dataset.logic === 'OR') {
+                                        keywordLogicSlider.style.transform = 'translateX(calc(100% + 2px))';
+                                    } else {
+                                        keywordLogicSlider.style.transform = 'translateX(0%)';
+                                    }
+                                });
+                            });
+                        }
+
+                        // --- Collapsible Section Logic ---
+                        const collapsibleSections = document.querySelectorAll('.collapsible-section');
+                        collapsibleSections.forEach(section => {
+                            const header = section.querySelector('.collapsible-header');
+                            const optionsContainer = section.querySelector('.filter-options-container');
+                            const options = optionsContainer.querySelector('.space-y-2');
+                            const allItems = options.querySelectorAll('label');
+                            
+                            if (allItems.length > 3) {
+                                let initialHeight = 0;
+                                for(let i = 0; i < 3; i++) {
+                                    initialHeight += allItems[i].offsetHeight;
+                                }
+                                const style = window.getComputedStyle(options);
+                                const gap = parseFloat(style.gap) || (parseFloat(style.getPropertyValue('margin-top')) * 2) || 8;
+                                initialHeight += gap * 2;
+
+                                optionsContainer.style.maxHeight = \`\${initialHeight}px\`;
+
+                                header.addEventListener('click', () => {
+                                    section.classList.toggle('expanded');
+                                    if (section.classList.contains('expanded')) {
+                                        optionsContainer.style.maxHeight = \`\${options.scrollHeight}px\`;
+                                    } else {
+                                        optionsContainer.style.maxHeight = \`\${initialHeight}px\`;
+                                    }
+                                });
+                            } else {
+                                const toggleIcon = header.querySelector('.toggle-icon');
+                                if (toggleIcon) {
+                                    toggleIcon.style.display = 'none';
+                                }
+                                header.style.cursor = 'default';
+                                optionsContainer.style.maxHeight = \`\${options.scrollHeight}px\`;
+                            }
+                        });
+                    `;
+                    scrapeModalContent.appendChild(scriptElement);
                 })
                 .catch(error => {
-                    console.error('Error processing data:', error);
-                    showNotification('Error processing data.', true);
+                    console.error('Error loading scrape page:', error);
+                    // Optionally show an error message to the user
+                    scrapeModalContent.innerHTML = '<p class="p-8 text-red-500">Could not load scrape options. Please try again later.</p>';
+                    scrapeModal.classList.remove('hidden');
+                    scrapeModal.classList.add('flex');
                 });
         });
     }
 
-    // --- Modal Handling ---
-    if(cleanupYes) {
-        cleanupYes.addEventListener('click', () => {
-            scrapeModalCleanup.classList.add('hidden');
-            scrapeModalBrowser.classList.remove('hidden');
-            startScrape(true);
-        });
-    }
-
-    if(cleanupNo) {
-        cleanupNo.addEventListener('click', () => {
-            scrapeModalCleanup.classList.add('hidden');
-            scrapeModalBrowser.classList.remove('hidden');
-            startScrape(false);
-        });
-    }
-
-    if(browserChrome) {
-        browserChrome.addEventListener('click', () => {
-            scrapeModalBrowser.classList.add('hidden');
-            runScrape(true, 'chrome');
-        });
-    }
-    
-    if(browserFirefox) {
-        browserFirefox.addEventListener('click', () => {
-            scrapeModalBrowser.classList.add('hidden');
-            runScrape(true, 'firefox');
-        });
-    }
-
-    let scrapeCleanup = false;
-
-    function startScrape(cleanup) {
-        scrapeCleanup = cleanup;
-    }
-
-    function runScrape(cleanup, browser) {
-        showNotification(`Starting scrape with ${browser}...`);
-        fetch('/scrape', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cleanup: cleanup, browser: browser })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if(data.success) {
-                showNotification('Scraping process started successfully.');
-            } else {
-                showNotification(data.error || 'Failed to start scraping.', true);
+    // Close the modal if the background is clicked
+    if(scrapeModal){
+        scrapeModal.addEventListener('click', (e) => {
+            if (e.target === scrapeModal) {
+                scrapeModal.classList.add('hidden');
+                scrapeModal.classList.remove('flex');
+                scrapeModalContent.innerHTML = ''; // Clear content when closing
             }
-        })
-        .catch(error => {
-            console.error('Error starting scrape:', error);
-            showNotification('Error starting scrape.', true);
         });
     }
     
