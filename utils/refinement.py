@@ -74,10 +74,10 @@ Subjects should be a list of strings, and should be "science", "medicine", "tech
 
 "total_compensation" should be a monetary value. If it is $25,000 for 3 years, then the total should be $75,000. If not specified, please write "N/A" instead. "other_funding" should be a string separated by commas, that tells what other funding is available.
 
-Interest rating should be a float between 1.0 and 3.0, which is based on your opinion of my interest in the fellowship based on the following information about me:
+Interest rating should be a float between 1.0 and 5.0 (in intervals of 0.5), which is based on your opinion of my interest in the fellowship based on the following information about me:
 {self.system_instructions}
 
-You should return a single JSON Object containing the information for the fellowship. Also if any subcategory of the fellowship is not clear, you should return a "NA" for that subcategory.
+You should return a single JSON Object containing the information for the fellowship. Also if any subcategory of the fellowship is not clear, you should return a "N/A" for that subcategory.
 """
         
         max_retries = 5

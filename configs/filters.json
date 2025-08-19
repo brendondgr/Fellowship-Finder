@@ -2,8 +2,6 @@
     "Browsing": "firefox",
     "categories": {
         "Fellowship Type": [
-            "Professional Fellowships",
-            "Masters Fellowships",
             "Doctoral Fellowships",
             "Summer Fellowships"
         ],
@@ -24,7 +22,9 @@
             "Any",
             "United States"
         ],
-        "Work Experience": [],
+        "Work Experience": [
+            "Less than 5 years"
+        ],
         "Funding Type": [
             "Fully Funded"
         ],
@@ -32,7 +32,11 @@
     },
     "keywords": {
         "type": "OR",
-        "words": []
+        "words": [
+            "heatlh",
+            "medicine",
+            "robotics"
+        ]
     },
-    "system_instructions": ""
+    "system_instructions": "I am deeply invested in the field of Artificial Intelligence and its practical applications across diverse domains. My primary research interests lie at the intersection of AI and healthcare, with a particular focus on robotic surgery. In addition to this core interest, I also enjoy exploring personalized medicine and investigating the potential of large language models (LLMs) in a variety of contexts. Nonetheless, my work remains centered on areas such as robotic surgery, medical imaging, and medical LLMs. I am not interested in pursuing research related to finance, conservation, or bioinformatics."
 }

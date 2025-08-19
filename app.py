@@ -129,6 +129,18 @@ def manage_filters():
             print(f"[POST /api/filters] Error saving filters: {e}")
             return jsonify({"success": False, "error": str(e)}), 500
 
+@app.route('/api/api_key', methods=['GET'])
+def get_api_key():
+    api_key_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'configs', 'api_key.json')
+    try:
+        with open(api_key_path, 'r') as f:
+            api_key_data = json.load(f)
+        return jsonify(api_key_data)
+    except FileNotFoundError:
+        return jsonify({"error": "API key file not found."}), 404
+    except json.JSONDecodeError:
+        return jsonify({"error": "Error decoding API key file."}), 500
+
 @app.route('/scrape', methods=['GET', 'POST'])
 def scrape():
     if request.method == 'GET':

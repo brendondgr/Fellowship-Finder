@@ -229,6 +229,19 @@ document.addEventListener('DOMContentLoaded', () => {
                                 }
                             });
                         }
+
+                        // --- Load API Key ---
+                        (async () => {
+                            try {
+                                const response = await fetch('/api/api_key');
+                                if (!response.ok) throw new Error('Failed to load API key');
+                                const data = await response.json();
+                                const apiKeyInput = modalRoot.querySelector('#api-key-input');
+                                if (apiKeyInput) apiKeyInput.value = data.gemini_api_key || '';
+                            } catch (error) {
+                                console.error('Error loading API key:', error);
+                            }
+                        })();
                     `;
                     scrapeModalContent.appendChild(scriptElement);
                 })
@@ -381,7 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function createRatingStars(rating) {
         let stars = '';
-        const totalStars = 4;
+        const totalStars = 5;
         const normalizedRating = Math.max(0, Math.min(rating || 0, totalStars));
 
         for (let i = 1; i <= totalStars; i++) {
