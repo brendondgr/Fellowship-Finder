@@ -70,6 +70,49 @@ class DataManager:
             return pd.DataFrame()
         return self.df[self.df['show'] == 1]
 
+    def get_filtered_fellowships(self, filters):
+        if self.df is None:
+            return pd.DataFrame()
+
+        df_filtered = self.df.copy()
+
+        # Filter by 'show' status
+        if not filters.get('show_removed', False):
+            df_filtered = df_filtered[df_filtered['show'] == 1]
+
+        # Filter by minimum stars
+        min_stars = filters.get('min_stars', 1)
+        if min_stars > 1:
+            df_filtered = df_filtered[df_filtered['interest_rating'] >= min_stars]
+
+        # Handle 'favorites_first' sorting
+        if filters.get('favorites_first', False):
+            df_filtered = df_filtered.sort_values(by='favorited', ascending=False)
+
+        # Handle search keywords
+        keywords = filters.get('keywords', [])
+        if keywords:
+            df_filtered['keyword_matches'] = df_filtered.apply(
+                lambda row: self._count_keyword_matches(row, keywords), axis=1
+            )
+            df_filtered = df_filtered[df_filtered['keyword_matches'] > 0]
+            df_filtered = df_filtered.sort_values(by='keyword_matches', ascending=False)
+        
+        return df_filtered
+
+    def _count_keyword_matches(self, row, keywords):
+        count = 0
+        search_text = ' '.join([
+            str(row.get('title', '')),
+            str(row.get('description', '')),
+            str(row.get('subjects', ''))
+        ]).lower()
+
+        for keyword in keywords:
+            if keyword.lower() in search_text:
+                count += 1
+        return count
+
     def update_fellowship_status(self, fellowship_id, status_type, value):
         if self.df is None:
             return False

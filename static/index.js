@@ -6,6 +6,25 @@ document.addEventListener('DOMContentLoaded', () => {
     let recentlyRemovedId = null;
     let undoTimeout = null;
 
+    // --- Filter and Search Elements ---
+    const getResultsBtn = document.getElementById('get-results-btn');
+    const minStarsSlider = document.getElementById('min-stars');
+    const minStarsValue = document.getElementById('min-stars-value');
+    const favoritesFirstCheckbox = document.getElementById('favorites-first');
+    const showRemovedCheckbox = document.getElementById('show-removed');
+    const searchInput = document.getElementById('search-input');
+    const refreshBtn = document.getElementById('refresh-btn');
+
+    minStarsSlider.addEventListener('input', () => {
+        minStarsValue.textContent = minStarsSlider.value;
+    });
+
+    getResultsBtn.addEventListener('click', () => {
+        currentPage = 1;
+        fellowshipCardsContainer.innerHTML = '';
+        fetchFellowships();
+    });
+
     const itemsPerPageSelector = document.getElementById('items-per-page');
     itemsPerPageSelector.addEventListener('change', () => {
         itemsPerPage = itemsPerPageSelector.value;
@@ -41,8 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const browserFirefox = document.getElementById('browser-firefox');
     const notificationContainer = document.getElementById('notification-container');
     const notificationMessage = document.getElementById('notification-message');
-    const refreshBtn = document.getElementById('refresh-btn');
-
+    
     function showNotification(message, isError = false) {
         notificationMessage.textContent = message;
         notificationContainer.classList.remove('hidden');
@@ -64,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(data.success) {
                         currentPage = 1;
                         fellowshipCardsContainer.innerHTML = '';
-                        fetchFellowships();
+                        fetchFellowships(); // Re-fetch with current filters
                         showNotification('Data refreshed successfully!');
                     } else {
                         showNotification(data.error || 'Failed to refresh data.', true);
@@ -165,7 +183,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function fetchFellowships() {
-        fetch(`/api/fellowships?page=${currentPage}&per_page=${itemsPerPage}`)
+        const minStars = minStarsSlider.value;
+        const favoritesFirst = favoritesFirstCheckbox.checked;
+        const showRemoved = showRemovedCheckbox.checked;
+        const keywords = searchInput.value;
+
+        const queryParams = new URLSearchParams({
+            page: currentPage,
+            per_page: itemsPerPage,
+            min_stars: minStars,
+            favorites_first: favoritesFirst,
+            show_removed: showRemoved,
+            keywords: keywords
+        });
+
+        fetch(`/api/fellowships?${queryParams.toString()}`)
             .then(response => response.json())
             .then(data => {
                 document.getElementById('total-opportunities').textContent = data.total_count;
@@ -310,7 +342,11 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    document.getElementById('total-opportunities').textContent = data.total_count;
+                    const totalElement = document.getElementById('total-opportunities');
+                    let currentTotal = parseInt(totalElement.textContent, 10);
+                    if (!isNaN(currentTotal)) {
+                        totalElement.textContent = currentTotal - 1;
+                    }
                 }
             })
             .catch(error => console.error('Error removing fellowship:', error));

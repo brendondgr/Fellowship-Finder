@@ -18,7 +18,15 @@ def get_fellowships():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
     
-    fellowships_df = data_manager.get_visible_fellowships()
+    # Extract filters from request arguments
+    filters = {
+        'min_stars': request.args.get('min_stars', 1, type=int),
+        'favorites_first': request.args.get('favorites_first', 'false').lower() == 'true',
+        'show_removed': request.args.get('show_removed', 'false').lower() == 'true',
+        'keywords': [kw.strip() for kw in request.args.get('keywords', '').split(',') if kw.strip()]
+    }
+
+    fellowships_df = data_manager.get_filtered_fellowships(filters)
     total_count = len(fellowships_df)
     
     start = (page - 1) * per_page
