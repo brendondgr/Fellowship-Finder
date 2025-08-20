@@ -67,7 +67,8 @@ I am looking for you to extract information about the fellowship, and provide me
     "other_funding": "string",
     "subjects": ["string", "string", "string"],
     "length_in_years": int,
-    "interest_rating": float
+    "interest_rating": float,
+    "deadline": "YYYY-MM"
 }}
 ```
 Subjects should be a list of strings, and should be "science", "medicine", "technology", "engineering", "arts", "social sciences", etc. Not "Minorities", "Full Funding", etc.

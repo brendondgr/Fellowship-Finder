@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='scrape.css') }}">
 </head>
 <body class="bg-gray-100">
 
@@ -215,7 +216,30 @@
                                 <div class="md:col-span-1 grid grid-cols-3 gap-4 text-center md:text-left">
                                     <div>
                                         <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider truncate">Total</h4>
-                                        <p class="text-lg font-semibold text-gray-800">{{ fellowship.total_compensation or 'N/A' }}</p>
+                                        <div class="flex items-center justify-center md:justify-start">
+                                            <p class="text-lg font-semibold text-gray-800">
+                                                {% set comp = fellowship.total_compensation %}
+                                                {% if comp is none or comp|string|trim == '' or comp|string|trim|lower == 'n/a' %}
+                                                    N/A
+                                                {% else %}
+                                                    {% if comp|string|first != '$' %}${% endif %}{{ comp }}
+                                                {% endif %}
+                                            </p>
+                                            {% if fellowship.other_funding and fellowship.other_funding|string|trim != '' %}
+                                                {% set other_funding_text = fellowship.other_funding | string | capitalize %}
+                                                {% if not (other_funding_text.endswith('.') or other_funding_text.endswith('!') or other_funding_text.endswith('?')) %}
+                                                    {% set other_funding_text = other_funding_text + '.' %}
+                                                {% endif %}
+                                                <div class="relative ml-2 group">
+                                                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    <div class="absolute bottom-full right-0 mb-2 w-64 p-2 bg-gray-800 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
+                                                        {{ other_funding_text }}
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        </div>
                                     </div>
                                     <div>
                                         <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Length</h4>
@@ -354,6 +378,7 @@
         </div>
     </div>
     
+    <script src="{{ url_for('static', filename='scrape.js', v='1.0.0') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Update min stars value display
@@ -400,13 +425,24 @@
                     fetch('/scrape')
                         .then(response => response.text())
                         .then(html => {
-                            scrapeModalContent.innerHTML = html;
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(html, 'text/html');
+                            const content = doc.querySelector('.p-6.sm\\:p-8.w-full.max-w-5xl.mx-auto');
+                            
+                            if (content) {
+                                scrapeModalContent.innerHTML = '';
+                                scrapeModalContent.appendChild(content);
+                                window.initializeScrapeForm();
+                            } else {
+                                scrapeModalContent.innerHTML = '<div class="bg-white p-8 rounded-lg text-red-500">Could not load scrape options. Content not found in response.</div>';
+                            }
+
                             scrapeModal.classList.remove('hidden');
                             scrapeModal.classList.add('flex');
                         })
                         .catch(error => {
                             console.error('Error loading scrape page:', error);
-                            scrapeModalContent.innerHTML = '<p class="p-8 text-red-500">Could not load scrape options. Please try again later.</p>';
+                            scrapeModalContent.innerHTML = '<div class="bg-white p-8 rounded-lg text-red-500">Could not load scrape options. Please try again later.</div>';
                             scrapeModal.classList.remove('hidden');
                             scrapeModal.classList.add('flex');
                         });

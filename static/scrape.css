@@ -1,0 +1,61 @@
+/* Custom styles for tooltips */
+.group:hover .group-hover\:opacity-100 {
+    opacity: 1;
+}
+/* Base selected state for buttons */
+.browser-btn.selected {
+    color: white;
+}
+/* Browser-specific colors */
+.browser-btn[data-browser="chrome"].selected {
+    background-color: #4285F4;
+    border-color: #4285F4;
+}
+.browser-btn[data-browser="firefox"].selected {
+    background-color: #FF7139;
+    border-color: #FF7139;
+}
+.browser-btn[data-browser="safari"].selected {
+    background-color: #00A1E1;
+    border-color: #00A1E1;
+}
+.browser-btn[data-browser="edge"].selected {
+    background-color: #0078D7;
+    border-color: #0078D7;
+}
+/* Styles for collapsible sections */
+.filter-options-container {
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+}
+.toggle-icon {
+    transition: transform 0.3s ease-in-out;
+}
+.collapsible-section.expanded .toggle-icon {
+    transform: rotate(90deg);
+}
+/* Ensure proper spacing for collapsible content */
+.space-y-2 > * + * {
+    margin-top: 0.5rem;
+}
+/* Loading state styles */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+.loading .loading-spinner {
+    display: inline-block;
+}
+.loading-spinner {
+    display: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+} 

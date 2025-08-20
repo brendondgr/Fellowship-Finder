@@ -9,54 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        /* Custom styles for tooltips */
-        .group:hover .group-hover\:opacity-100 {
-            opacity: 1;
-        }
-        /* Base selected state for buttons */
-        .browser-btn.selected {
-            color: white;
-        }
-        /* Browser-specific colors */
-        .browser-btn[data-browser="chrome"].selected {
-            background-color: #4285F4;
-            border-color: #4285F4;
-        }
-        .browser-btn[data-browser="firefox"].selected {
-            background-color: #FF7139;
-            border-color: #FF7139;
-        }
-        .browser-btn[data-browser="safari"].selected {
-            background-color: #00A1E1;
-            border-color: #00A1E1;
-        }
-        .browser-btn[data-browser="edge"].selected {
-            background-color: #0078D7;
-            border-color: #0078D7;
-        }
-        /* Keyword logic button text color */
-        .keyword-logic-btn.selected {
-            color: white;
-        }
-        .keyword-logic-btn {
-            color: #6b7280; /* gray-500 */
-        }
-        /* Styles for collapsible sections */
-        .filter-options-container {
-            overflow: hidden;
-            transition: max-height 0.5s ease-in-out;
-        }
-        .toggle-icon {
-            transition: transform 0.3s ease-in-out;
-        }
-        .collapsible-section.expanded .toggle-icon {
-            transform: rotate(90deg);
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='scrape.css') }}">
 </head>
 <body class="bg-white">
 
@@ -103,7 +56,7 @@
                         </div>
                     </div>
                 </h2>
-                 <input type="password" id="api-key-input" placeholder="Enter your API key" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                 <input type="password" id="api-key-input" placeholder="Enter your API key" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" value="{% if api_key %}{{ api_key }}{% endif %}">
             </div>
         </div>
 
@@ -272,8 +225,8 @@
                         <!-- Sliding Toggle for AND/OR -->
                         <div id="keyword-logic-container" class="relative flex items-center border border-gray-300 rounded-lg p-0.5 w-24 cursor-pointer">
                             <div id="keyword-logic-slider" class="absolute top-0.5 left-0.5 h-[calc(100%-4px)] w-[calc(50%-2px)] bg-gray-800 rounded-md transition-transform duration-300 ease-in-out" style="transform: {% if keyword_logic == 'OR' %}translateX(calc(100% + 2px)){% else %}translateX(0%){% endif %};"></div>
-                            <button type="button" data-logic="AND" class="keyword-logic-btn {% if keyword_logic == 'AND' %}selected{% endif %} flex-1 text-xs font-bold py-1 px-3 rounded-md relative z-10 transition-colors duration-300">AND</button>
-                            <button type="button" data-logic="OR" class="keyword-logic-btn {% if keyword_logic == 'OR' %}selected{% endif %} flex-1 text-xs font-bold py-1 px-3 rounded-md relative z-10 transition-colors duration-300">OR</button>
+                            <button type="button" data-logic="AND" class="keyword-logic-btn {% if keyword_logic == 'AND' %}selected text-white{% else %}text-gray-500{% endif %} flex-1 text-xs font-bold py-1 px-3 rounded-md relative z-10 transition-colors duration-300">AND</button>
+                            <button type="button" data-logic="OR" class="keyword-logic-btn {% if keyword_logic == 'OR' %}selected text-white{% else %}text-gray-500{% endif %} flex-1 text-xs font-bold py-1 px-3 rounded-md relative z-10 transition-colors duration-300">OR</button>
                         </div>
                     </div>
                     <input type="text" id="keywords-input" placeholder="e.g. research, data science" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" value="{{ (filters.get('keywords', {}).get('words', []) | join(', ')) }}">
@@ -299,209 +252,7 @@
 
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- Browser Button Selection ---
-            const browserButtons = document.querySelectorAll('.browser-btn');
-            browserButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    browserButtons.forEach(btn => {
-                        btn.classList.remove('selected');
-                        btn.classList.add('text-gray-600');
-                    });
-                    button.classList.add('selected');
-                    button.classList.remove('text-gray-600');
-                });
-            });
-
-            // --- Keyword Logic Sliding Toggle ---
-            const keywordLogicSlider = document.getElementById('keyword-logic-slider');
-            const keywordLogicButtons = document.querySelectorAll('.keyword-logic-btn');
-            keywordLogicButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    keywordLogicButtons.forEach(btn => btn.classList.remove('selected'));
-                    button.classList.add('selected');
-                    if (button.dataset.logic === 'OR') {
-                        keywordLogicSlider.style.transform = 'translateX(calc(100% + 2px))';
-                    } else {
-                        keywordLogicSlider.style.transform = 'translateX(0%)';
-                    }
-                });
-            });
-
-            // --- Collapsible Section Logic ---
-            const collapsibleSections = document.querySelectorAll('.collapsible-section');
-            collapsibleSections.forEach(section => {
-                const header = section.querySelector('.collapsible-header');
-                const optionsContainer = section.querySelector('.filter-options-container');
-                const options = optionsContainer.querySelector('.space-y-2');
-                const allItems = options.querySelectorAll('label');
-                
-                if (allItems.length > 3) {
-                    // Calculate initial collapsed height (for 3 items)
-                    let initialHeight = 0;
-                    for(let i = 0; i < 3; i++) {
-                        initialHeight += allItems[i].offsetHeight;
-                    }
-                    const style = window.getComputedStyle(options);
-                    const gap = parseFloat(style.gap) || (parseFloat(style.getPropertyValue('margin-top')) * 2) || 8;
-                    initialHeight += gap * 2;
-
-                    optionsContainer.style.maxHeight = `${initialHeight}px`;
-
-                    header.addEventListener('click', () => {
-                        section.classList.toggle('expanded');
-                        if (section.classList.contains('expanded')) {
-                            optionsContainer.style.maxHeight = `${options.scrollHeight}px`;
-                        } else {
-                            optionsContainer.style.maxHeight = `${initialHeight}px`;
-                        }
-                    });
-                } else {
-                    // If 3 or fewer items, remove the toggle icon and functionality
-                    header.querySelector('.toggle-icon').style.display = 'none';
-                    header.style.cursor = 'default';
-                    optionsContainer.style.maxHeight = `${options.scrollHeight}px`;
-                }
-            });
-
-            // --- Load and Save Filters ---
-            const loadFilters = async () => {
-                try {
-                    const response = await fetch('/api/filters');
-                    if (!response.ok) {
-                        throw new Error('Failed to load filters');
-                    }
-                    const filters = await response.json();
-
-                    // Set browser
-                    document.querySelectorAll('.browser-btn').forEach(btn => {
-                        btn.classList.remove('selected', 'text-gray-600');
-                        if (btn.dataset.browser === filters.Browsing) {
-                            btn.classList.add('selected');
-                        } else {
-                            btn.classList.add('text-gray-600');
-                        }
-                    });
-
-                    // Set categories
-                    for (const category in filters.categories) {
-                        const values = filters.categories[category];
-                        const container = document.querySelector(`[data-category="${category}"]`);
-                        if (!container) {
-                            console.warn(`Container for category "${category}" not found.`);
-                            continue;
-                        }
-
-                        if (category === 'Citizenship Requirement' || category === 'Residency Requirement') {
-                            container.querySelector('input').value = values.join(', ');
-                        } else {
-                            container.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                                if (values.includes(checkbox.value)) {
-                                    checkbox.checked = true;
-                                }
-                            });
-                        }
-                    }
-
-                    // Set keywords
-                    document.getElementById('keywords-input').value = filters.keywords.words.join(', ');
-                    const logic = filters.keywords.type.toUpperCase();
-                    document.querySelectorAll('.keyword-logic-btn').forEach(btn => {
-                        btn.classList.remove('selected');
-                        if (btn.dataset.logic === logic) {
-                            btn.classList.add('selected');
-                            const slider = document.getElementById('keyword-logic-slider');
-                            if (logic === 'OR') {
-                                slider.style.transform = 'translateX(calc(100% + 2px))';
-                            } else {
-                                slider.style.transform = 'translateX(0%)';
-                            }
-                        }
-                    });
-
-                    // Set system instructions
-                    document.getElementById('system-instructions-textarea').value = filters.system_instructions;
-
-                } catch (error) {
-                    console.error('Error loading filters:', error);
-                }
-            };
-
-            const saveFilters = async () => {
-                const filtersToSave = {
-                    Browsing: document.querySelector('.browser-btn.selected').dataset.browser,
-                    categories: {},
-                    keywords: {
-                        type: document.querySelector('.keyword-logic-btn.selected').dataset.logic,
-                        words: document.getElementById('keywords-input').value.split(',').map(s => s.trim()).filter(Boolean)
-                    },
-                    system_instructions: document.getElementById('system-instructions-textarea').value
-                };
-
-                document.querySelectorAll('[data-category]').forEach(container => {
-                    const category = container.dataset.category;
-                    if (category === 'keywords' || category === 'system_instructions') return;
-
-                    if (category === 'Citizenship Requirement' || category === 'Residency Requirement') {
-                        filtersToSave.categories[category] = container.querySelector('input').value.split(',').map(s => s.trim()).filter(Boolean);
-                    } else {
-                        const selected = [];
-                        container.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
-                            selected.push(checkbox.value);
-                        });
-                        filtersToSave.categories[category] = selected;
-                    }
-                });
-
-                try {
-                    const response = await fetch('/api/filters', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(filtersToSave, null, 4)
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to save filters');
-                    }
-
-                    const result = await response.json();
-                    if (result.success) {
-                        alert('Filters saved successfully!');
-                    } else {
-                        alert('Error saving filters: ' + result.error);
-                    }
-                } catch (error) {
-                    console.error('Error saving filters:', error);
-                    alert('An error occurred while saving filters.');
-                }
-            };
-
-            const loadApiKey = async () => {
-                try {
-                    const response = await fetch('/api/api_key');
-                    if (!response.ok) {
-                        throw new Error('Failed to load API key');
-                    }
-                    const data = await response.json();
-                    const input = document.getElementById('api-key-input');
-                    if (input) {
-                        input.value = data.gemini_api_key || '';
-                    }
-                } catch (error) {
-                    console.error('Error loading API key:', error);
-                }
-            };
-
-            document.getElementById('begin-searching-btn').addEventListener('click', saveFilters);
-
-            // Keep this call for when /scrape is loaded directly as a page
-            loadFilters();
-            loadApiKey();
-        });
-    </script>
+    <script src="{{ url_for('static', filename='scrape.js', v='1.0.0') }}"></script>
 
 </body>
 </html>

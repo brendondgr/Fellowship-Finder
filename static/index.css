@@ -43,9 +43,8 @@ body {
     background-color: #fff;
     padding: 30px;
     border-radius: 8px;
-    max-width: 90%; /* Adjust based on preference */
-    max-height: 90vh; /* Limit height to viewport height */
-    overflow-y: auto; /* Enable scrolling for content if it exceeds max-height */
+    width: 900px; /* Use a fixed width for larger screens */
+    max-width: 95%; /* Ensure it's responsive on smaller screens */
     margin: auto; /* Center the modal content */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }

@@ -2,17 +2,16 @@
     "Browsing": "firefox",
     "categories": {
         "Fellowship Type": [
-            "Doctoral Fellowships",
-            "Summer Fellowships"
+            "Doctoral Fellowships"
         ],
         "Discipline": [
-            "Science",
-            "Medicine / Health Sciences",
-            "Technology",
-            "Engineering"
+            "Medicine / Health Sciences"
         ],
         "Location": [
             "North America"
+        ],
+        "Deadline": [
+            "Rolling/Multiple Deadlines"
         ],
         "Citizenship Requirement": [
             "Any",
@@ -21,22 +20,19 @@
         "Residency Requirement": [
             "Any",
             "United States"
-        ],
-        "Work Experience": [
-            "Less than 5 years"
-        ],
-        "Funding Type": [
-            "Fully Funded"
-        ],
-        "Deadline": []
+        ]
     },
     "keywords": {
         "type": "OR",
         "words": [
             "health",
             "medicine",
-            "robotics"
+            "ai",
+            "machine learning",
+            "artificial intelligence",
+            "computer vision",
+            "medical imaging"
         ]
     },
-    "system_instructions": "I am deeply invested in the field of Artificial Intelligence and its practical applications across diverse domains. My primary research interests lie at the intersection of AI and healthcare, with a particular focus on robotic surgery. In addition to this core interest, I also enjoy exploring personalized medicine and investigating the potential of large language models (LLMs) in a variety of contexts. Nonetheless, my work remains centered on areas such as robotic surgery, medical imaging, and medical LLMs. I am not interested in pursuing research related to finance, conservation, or bioinformatics."
+    "system_instructions": "I am deeply invested in the field of Artificial Intelligence and its practical applications across diverse domains. My primary research interests lie at the intersection of AI and healthcare, with a particular focus on robotic surgery. In addition to this core interest, I also enjoy exploring personalized medicine and investigating the potential of large language models (LLMs) in a variety of contexts. Nonetheless, my work remains centered on areas such as robotic surgery, medical imaging, and medical LLMs. I am not interested in pursuing research related to finance, conservation, or bioinformatics/systems biology.\n\nYou can rate things very high (5-Stars) if they fall into the realm of AI in various domains, such as robotic surgery, health or medicine. If they fall into categories such as Business in the Medical Industry, rate this higher as well (5 star). Reserve 3-4 Stars that relate to AI/Machine Learning, but are loosely related to health/medicine, or oceanography. 1-2 Stars are for topics that are not at all related to aritficial intelligence or machine learning."
 }

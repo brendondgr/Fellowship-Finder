@@ -105,145 +105,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     scrapeModal.classList.remove('hidden');
                     scrapeModal.classList.add('flex'); // Use flex to center the modal content
                     
-                    // Manually execute the script content from scrape.js
-                    const scriptElement = document.createElement('script');
-                    scriptElement.textContent = `
-                        // --- Browser Button Selection ---
-                        const browserButtons = document.querySelectorAll('.browser-btn');
-                        browserButtons.forEach(button => {
-                            button.addEventListener('click', () => {
-                                browserButtons.forEach(btn => {
-                                    btn.classList.remove('selected');
-                                    btn.classList.add('text-gray-600');
-                                });
-                                button.classList.add('selected');
-                                button.classList.remove('text-gray-600');
-                            });
-                        });
-
-                        // --- Keyword Logic Sliding Toggle ---
-                        const keywordLogicSlider = document.getElementById('keyword-logic-slider');
-                        const keywordLogicButtons = document.querySelectorAll('.keyword-logic-btn');
-                        if (keywordLogicSlider && keywordLogicButtons.length) {
-                            keywordLogicButtons.forEach(button => {
-                                button.addEventListener('click', () => {
-                                    keywordLogicButtons.forEach(btn => btn.classList.remove('selected'));
-                                    button.classList.add('selected');
-                                    if (button.dataset.logic === 'OR') {
-                                        keywordLogicSlider.style.transform = 'translateX(calc(100% + 2px))';
-                                    } else {
-                                        keywordLogicSlider.style.transform = 'translateX(0%)';
-                                    }
-                                });
-                            });
+                    // The HTML from /scrape is now in the modal. We need to run its JS.
+                    // We created a function `initializeScrapeForm` in scrape.js for this.
+                    // Let's make sure that script is loaded, then call the function.
+                    const scriptSrc = '/static/scrape.js';
+                    let script = document.querySelector(`script[src="${scriptSrc}"]`);
+                    
+                    const initialize = () => {
+                        if (window.initializeScrapeForm) {
+                            window.initializeScrapeForm(scrapeModalContent);
+                        } else {
+                            console.error('initializeScrapeForm function not found. Was scrape.js loaded correctly?');
                         }
+                    };
 
-                        // --- Collapsible Section Logic ---
-                        const collapsibleSections = document.querySelectorAll('.collapsible-section');
-                        collapsibleSections.forEach(section => {
-                            const header = section.querySelector('.collapsible-header');
-                            const optionsContainer = section.querySelector('.filter-options-container');
-                            const options = optionsContainer.querySelector('.space-y-2');
-                            const allItems = options.querySelectorAll('label');
-                            
-                            if (allItems.length > 3) {
-                                let initialHeight = 0;
-                                for(let i = 0; i < 3; i++) {
-                                    initialHeight += allItems[i].offsetHeight;
-                                }
-                                const style = window.getComputedStyle(options);
-                                const gap = parseFloat(style.gap) || (parseFloat(style.getPropertyValue('margin-top')) * 2) || 8;
-                                initialHeight += gap * 2;
-
-                                optionsContainer.style.maxHeight = \`\${initialHeight}px\`;
-
-                                header.addEventListener('click', () => {
-                                    section.classList.toggle('expanded');
-                                    if (section.classList.contains('expanded')) {
-                                        optionsContainer.style.maxHeight = \`\${options.scrollHeight}px\`;
-                                    } else {
-                                        optionsContainer.style.maxHeight = \`\${initialHeight}px\`;
-                                    }
-                                });
-                            } else {
-                                const toggleIcon = header.querySelector('.toggle-icon');
-                                if (toggleIcon) {
-                                    toggleIcon.style.display = 'none';
-                                }
-                                header.style.cursor = 'default';
-                                optionsContainer.style.maxHeight = \`\${options.scrollHeight}px\`;
-                            }
-                        });
-
-                        // --- Save Filters on Begin Searching ---
-                        const modalRoot = document.getElementById('scrape-modal-content');
-                        const beginSearchingBtn = modalRoot.querySelector('#begin-searching-btn');
-                        if (beginSearchingBtn) {
-                            beginSearchingBtn.addEventListener('click', async () => {
-                                try {
-                                    const selectedBrowserButton = modalRoot.querySelector('.browser-btn.selected');
-                                    const browsing = selectedBrowserButton ? selectedBrowserButton.dataset.browser : 'firefox';
-
-                                    const filtersToSave = {
-                                        Browsing: browsing,
-                                        categories: {},
-                                        keywords: {
-                                            type: (modalRoot.querySelector('.keyword-logic-btn.selected') || {}).dataset?.logic || 'AND',
-                                            words: (modalRoot.querySelector('#keywords-input')?.value || '').split(',').map(s => s.trim()).filter(Boolean)
-                                        },
-                                        system_instructions: modalRoot.querySelector('#system-instructions-textarea')?.value || ''
-                                    };
-
-                                    modalRoot.querySelectorAll('[data-category]').forEach(container => {
-                                        const category = container.dataset.category;
-                                        if (category === 'keywords' || category === 'system_instructions') return;
-
-                                        if (category === 'Citizenship Requirement' || category === 'Residency Requirement') {
-                                            const input = container.querySelector('input');
-                                            const value = input ? input.value : '';
-                                            filtersToSave.categories[category] = value.split(',').map(s => s.trim()).filter(Boolean);
-                                        } else {
-                                            const selected = [];
-                                            container.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
-                                                selected.push(checkbox.value);
-                                            });
-                                            filtersToSave.categories[category] = selected;
-                                        }
-                                    });
-
-                                    const resp = await fetch('/api/filters', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify(filtersToSave, null, 4)
-                                    });
-
-                                    const result = await resp.json();
-                                    if (resp.ok && result.success) {
-                                        alert('Filters saved successfully!');
-                                    } else {
-                                        alert('Error saving filters: ' + (result.error || resp.statusText));
-                                    }
-                                } catch (err) {
-                                    console.error('Error saving filters:', err);
-                                    alert('An error occurred while saving filters.');
-                                }
-                            });
-                        }
-
-                        // --- Load API Key ---
-                        (async () => {
-                            try {
-                                const response = await fetch('/api/api_key');
-                                if (!response.ok) throw new Error('Failed to load API key');
-                                const data = await response.json();
-                                const apiKeyInput = modalRoot.querySelector('#api-key-input');
-                                if (apiKeyInput) apiKeyInput.value = data.gemini_api_key || '';
-                            } catch (error) {
-                                console.error('Error loading API key:', error);
-                            }
-                        })();
-                    `;
-                    scrapeModalContent.appendChild(scriptElement);
+                    if (script) {
+                        // If script is already on the page, just run the initializer
+                        initialize();
+                    } else {
+                        // If not, create it, load it, and then run the initializer
+                        script = document.createElement('script');
+                        script.src = scriptSrc;
+                        script.onload = initialize;
+                        document.body.appendChild(script);
+                    }
                 })
                 .catch(error => {
                     console.error('Error loading scrape page:', error);

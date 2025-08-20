@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from tqdm import tqdm
 from utils.data_manager import format_deadline
+from datetime import datetime
 
 class DataProcessor:
     def __init__(self):
@@ -229,7 +230,12 @@ class DataProcessor:
             if re.match(r"\d{4}-\d{2}", deadline):
                 data["deadline"] = deadline
             else:
-                data["deadline"] = "NA"
+                try:
+                    # Attempt to parse from "Month, YYYY" format
+                    date_obj = datetime.strptime(deadline, "%B, %Y")
+                    data["deadline"] = date_obj.strftime("%Y-%m")
+                except ValueError:
+                    data["deadline"] = "NA"
             
             # Subjects: should be a list of strings
             subjects = data.get("subjects", [])
@@ -240,7 +246,9 @@ class DataProcessor:
 
             # Total Compensation: should start with $
             compensation = str(data.get("total_compensation", ""))
-            if compensation.startswith("$"):
+            if compensation.upper() == "N/A":
+                data["total_compensation"] = "N/A"
+            elif compensation.startswith("$"):
                 data["total_compensation"] = compensation
             else:
                 data["total_compensation"] = f"${compensation}"

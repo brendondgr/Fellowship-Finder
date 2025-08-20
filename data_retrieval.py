@@ -17,6 +17,7 @@ def main():
     parser.add_argument('--cleanup', action='store_true', help="Clear both tmp and data folders before starting the bot.")
     parser.add_argument('--cleardata', action='store_true', help="Clear the data folder before starting the bot.")
     parser.add_argument('--refine', action='store_true', help="Refine existing raw data without running the scraper.")
+    parser.add_argument('--notify-app', action='store_true', help="Notify the Flask app to refresh data upon completion.")
     args = parser.parse_args()
 
     if args.cleartmp:
@@ -49,7 +50,7 @@ def main():
 
         # Update the config file if a valid browser is specified via command line
         # --- Bot Execution ---
-        bot = ProfellowBot(browser=browser)
+        bot = ProfellowBot(browser=browser, notify_app=args.notify_app)
         bot.run()
 
 if __name__ == "__main__":

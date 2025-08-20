@@ -1,6 +1,7 @@
 import json
 import time
 import random
+import requests
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.chrome.service import Service as ChromeService
@@ -19,10 +20,11 @@ from utils.refinement import GeminiRefiner
 
 
 class ProfellowBot:
-    def __init__(self, browser=None):
+    def __init__(self, browser=None, notify_app=False):
         config = configparser.ConfigParser()
         config.read('config.ini')
         self.configs_path = config.get('PATHS', 'configs', fallback='configs/')
+        self.notify_app = notify_app
 
         # Load filters from JSON file for browser selection and categories
         with open(os.path.join(self.configs_path, "filters.json"), "r") as f:
@@ -370,6 +372,17 @@ class ProfellowBot:
             print("Starting data refinement process...")
             self.data_processor.refine_and_save_fellowships(self.refiner)
             print("Data refinement process finished.")
+
+            if self.notify_app:
+                print("Notifying Flask app to refresh data...")
+                try:
+                    response = requests.post("http://127.0.0.1:5000/api/refresh")
+                    if response.status_code == 200:
+                        print("Successfully notified Flask app.")
+                    else:
+                        print(f"Failed to notify Flask app. Status code: {response.status_code}, Response: {response.text}")
+                except requests.exceptions.RequestException as e:
+                    print(f"Error notifying Flask app: {e}")
 
     def _load_more_results(self):
         print("Attempting to load more results...")

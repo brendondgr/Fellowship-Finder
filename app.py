@@ -145,23 +145,23 @@ def index():
     print(f"[Index] Returning {len(fellowships_list)} items | page={page}/{total_pages} | has_more={has_more} | has_previous={has_previous}")
     
     return render_template("index.html",
-                         fellowships=fellowships_list,
-                         total_count=total_count,
-                         current_page=page,
-                         per_page=per_page,
-                         total_pages=total_pages,
-                         has_more=has_more,
-                         has_previous=has_previous,
-                         next_page=next_page,
-                         previous_page=previous_page,
-                         page_range=page_range,
-                         filters={
-                             'min_stars': min_stars,
-                             'favorites_first': favorites_first,
-                             'show_removed': show_removed,
-                             'keywords': keywords
-                         },
-                         data_available=data_manager.data_available)
+                        fellowships=fellowships_list,
+                        total_count=total_count,
+                        current_page=page,
+                        per_page=per_page,
+                        total_pages=total_pages,
+                        has_more=has_more,
+                        has_previous=has_previous,
+                        next_page=next_page,
+                        previous_page=previous_page,
+                        page_range=page_range,
+                        filters={
+                            'min_stars': min_stars,
+                            'favorites_first': favorites_first,
+                            'show_removed': show_removed,
+                            'keywords': keywords
+                        },
+                        data_available=data_manager.data_available)
 
 @app.route("/api/fellowships", methods=['GET'])
 def get_fellowships():
@@ -341,7 +341,7 @@ def manage_filters():
                 json.dump(new_filters, f, indent=4)
             # After saving filters, start the scraping process (no flags)
             try:
-                command = [sys.executable, 'data_retrieval.py']
+                command = [sys.executable, 'data_retrieval.py', '--notify-app']
                 cwd_path = os.path.dirname(os.path.abspath(__file__))
                 print(f"[POST /api/filters] Starting scraping process: {' '.join(command)} (cwd={cwd_path})")
                 subprocess.Popen(command, cwd=cwd_path)
@@ -353,17 +353,30 @@ def manage_filters():
             print(f"[POST /api/filters] Error saving filters: {e}")
             return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route('/api/api_key', methods=['GET'])
-def get_api_key():
+@app.route('/api/api_key', methods=['GET', 'POST'])
+def manage_api_key():
     api_key_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'configs', 'api_key.json')
-    try:
-        with open(api_key_path, 'r') as f:
-            api_key_data = json.load(f)
-        return jsonify(api_key_data)
-    except FileNotFoundError:
-        return jsonify({"error": "API key file not found."}), 404
-    except json.JSONDecodeError:
-        return jsonify({"error": "Error decoding API key file."}), 500
+    
+    if request.method == 'GET':
+        try:
+            with open(api_key_path, 'r') as f:
+                api_key_data = json.load(f)
+            return jsonify(api_key_data)
+        except FileNotFoundError:
+            return jsonify({"error": "API key file not found."}), 404
+        except json.JSONDecodeError:
+            return jsonify({"error": "Error decoding API key file."}), 500
+    
+    if request.method == 'POST':
+        try:
+            new_api_key_data = request.json
+            print(f"[POST /api/api_key] Saving API key data to: {api_key_path}")
+            with open(api_key_path, 'w') as f:
+                json.dump(new_api_key_data, f, indent=4)
+            return jsonify({"success": True, "message": "API key saved successfully."})
+        except Exception as e:
+            print(f"[POST /api/api_key] Error saving API key: {e}")
+            return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/scrape', methods=['GET', 'POST'])
 def scrape():
@@ -384,7 +397,21 @@ def scrape():
             print(f"[GET /scrape] Filters file not found at: {filters_path}. Proceeding with defaults.")
         except json.JSONDecodeError as e:
             print(f"[GET /scrape] Error decoding filters file: {e}. Proceeding with defaults.")
-        return render_template('scrape.html', filters=filters)
+        
+        # Load API key if it exists
+        api_key_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'configs', 'api_key.json')
+        api_key = None
+        try:
+            with open(api_key_path, 'r') as f:
+                api_key_data = json.load(f)
+                api_key = api_key_data.get('gemini_api_key', '')
+            print(f"[GET /scrape] Loaded API key (length: {len(api_key) if api_key else 0})")
+        except FileNotFoundError:
+            print(f"[GET /scrape] API key file not found at: {api_key_path}")
+        except json.JSONDecodeError as e:
+            print(f"[GET /scrape] Error decoding API key file: {e}")
+        
+        return render_template('scrape.html', filters=filters, api_key=api_key)
     
     data = request.get_json()
     cleanup = data.get('cleanup', False)
