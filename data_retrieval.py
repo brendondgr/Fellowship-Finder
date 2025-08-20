@@ -1,10 +1,10 @@
 import argparse
-import configparser
 from utils.scrape import ProfellowBot
 from utils.files_folders import FileManager
 from utils.data import DataProcessor
 from utils.refinement import GeminiRefiner
 import os
+import json
 
 def main():
     # --- File and Folder Setup ---
@@ -12,11 +12,7 @@ def main():
     file_manager.setup()
 
     # --- Configuration and Argument Parsing ---
-    config = configparser.ConfigParser()
-    config.read('config.ini')
-
     parser = argparse.ArgumentParser(description="A bot to scrape Profellow.com")
-    parser.add_argument('--browser', type=str, help="Specify the browser to use ('firefox' or 'chrome').")
     parser.add_argument('--cleartmp', action='store_true', help="Clear the tmp folder before starting the bot.")
     parser.add_argument('--cleanup', action='store_true', help="Clear both tmp and data folders before starting the bot.")
     parser.add_argument('--cleardata', action='store_true', help="Clear the data folder before starting the bot.")
@@ -45,15 +41,13 @@ def main():
         data_processor.refine_and_save_fellowships(refiner)
     else:
         # Determine the browser to use
-        browser = args.browser if args.browser else config.get('SETTINGS', 'browser', fallback='firefox')
+        # Read browser from filters.json
+        filters_path = os.path.join(os.getcwd(), 'configs', 'filters.json')
+        with open(filters_path, 'r') as f:
+            filters_config = json.load(f)
+        browser = filters_config.get('Browsing', 'firefox')
 
         # Update the config file if a valid browser is specified via command line
-        if args.browser and args.browser.lower() in ['firefox', 'chrome']:
-            if config.get('SETTINGS', 'browser') != args.browser.lower():
-                config.set('SETTINGS', 'browser', args.browser.lower())
-                with open('config.ini', 'w') as configfile:
-                    config.write(configfile)
-
         # --- Bot Execution ---
         bot = ProfellowBot(browser=browser)
         bot.run()

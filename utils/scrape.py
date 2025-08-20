@@ -239,7 +239,7 @@ class ProfellowBot:
                         continue
 
                     # Extract the name and the count
-                    checkbox_name = ''.join(filter(lambda x: not x.isdigit(), checkbox_text_full)).strip('() ').lower()
+                    checkbox_name = ''.join(filter(lambda x: not x.isdigit(), checkbox_text_full)).strip('() ')
                     
                     print(f"Comparing extracted checkbox name '{checkbox_name}' with items to select: {items_to_select}")
                     if checkbox_name in items_to_select:
@@ -357,8 +357,8 @@ class ProfellowBot:
             self._load_more_results()
 
             # Keep the browser open for a while to see the result
-            print("Process finished. Browser will close in 30 seconds.")
-            time.sleep(30)
+            print("Process finished. Browser will close in 5 seconds.")
+            time.sleep(5)
 
         except Exception as e:
             print(f"An error occurred during the scraping process: {e}")

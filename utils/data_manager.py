@@ -39,6 +39,7 @@ class DataManager:
             print(f"DataManager: Loading data from {self.fellowship_csv_path}")
             self.df = pd.read_csv(self.fellowship_csv_path)
             self.ensure_required_columns()
+            self._coerce_column_types()
             self.data_available = True
             print(f"DataManager: Data loaded successfully. Total rows: {len(self.df)}")
         except Exception as e:
@@ -66,6 +67,24 @@ class DataManager:
         if self.df is not None:
             self.df.to_csv(self.fellowship_csv_path, index=False)
 
+    def _coerce_column_types(self):
+        """Ensure important columns have expected data types for filtering/sorting."""
+        if self.df is None:
+            return
+        try:
+            # favorited and show should be 0/1 integers
+            for col in ['favorited', 'show']:
+                if col in self.df.columns:
+                    self.df[col] = pd.to_numeric(self.df[col], errors='coerce', downcast='integer').fillna(0).astype(int)
+            # interest_rating should be float
+            if 'interest_rating' in self.df.columns:
+                self.df['interest_rating'] = pd.to_numeric(self.df['interest_rating'], errors='coerce').fillna(0.0).astype(float)
+            # length_in_years should be integer if present
+            if 'length_in_years' in self.df.columns:
+                self.df['length_in_years'] = pd.to_numeric(self.df['length_in_years'], errors='coerce').fillna(0).astype(int)
+        except Exception as e:
+            print(f"DataManager: Warning - failed to coerce column types: {e}")
+
     def get_visible_fellowships(self):
         if self.df is None:
             return pd.DataFrame()
@@ -76,19 +95,25 @@ class DataManager:
             return pd.DataFrame()
 
         df_filtered = self.df.copy()
+        print(f"DataManager: Starting filter. total_rows={len(df_filtered)} show_removed={filters.get('show_removed', False)} min_stars={filters.get('min_stars')} favorites_first={filters.get('favorites_first')} keywords_len={len(filters.get('keywords', []))}")
 
         # Filter by 'show' status
         if not filters.get('show_removed', False):
+            before = len(df_filtered)
             df_filtered = df_filtered[df_filtered['show'] == 1]
+            print(f"DataManager: After show==1 filter: {len(df_filtered)} (removed {before - len(df_filtered)})")
 
         # Filter by minimum stars
         min_stars = filters.get('min_stars', 1)
         if min_stars > 1:
+            before = len(df_filtered)
             df_filtered = df_filtered[df_filtered['interest_rating'] >= min_stars]
+            print(f"DataManager: After min_stars>={min_stars} filter: {len(df_filtered)} (removed {before - len(df_filtered)})")
 
         # Handle 'favorites_first' sorting
         if filters.get('favorites_first', False):
             df_filtered = df_filtered.sort_values(by='favorited', ascending=False)
+            print("DataManager: Sorted with favorites first")
 
         # Handle search keywords
         keywords = filters.get('keywords', [])
@@ -96,8 +121,10 @@ class DataManager:
             df_filtered['keyword_matches'] = df_filtered.apply(
                 lambda row: self._count_keyword_matches(row, keywords), axis=1
             )
+            before = len(df_filtered)
             df_filtered = df_filtered[df_filtered['keyword_matches'] > 0]
             df_filtered = df_filtered.sort_values(by='keyword_matches', ascending=False)
+            print(f"DataManager: After keywords filter: {len(df_filtered)} (removed {before - len(df_filtered)})")
         
         return df_filtered
 
