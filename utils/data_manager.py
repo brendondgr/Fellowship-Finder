@@ -59,6 +59,22 @@ class DataManager:
         if 'interest_rating' not in self.df.columns:
             self.df['interest_rating'] = 0
             updated = True
+        
+        if 'total_compensation' not in self.df.columns:
+            self.df['total_compensation'] = "N/A"
+            updated = True
+            
+        if 'other_funding' not in self.df.columns:
+            self.df['other_funding'] = ""
+            updated = True
+            
+        if 'subjects' not in self.df.columns:
+            self.df['subjects'] = []
+            updated = True
+            
+        if 'length_in_years' not in self.df.columns:
+            self.df['length_in_years'] = 0
+            updated = True
 
         if updated:
             self.save_fellowship_data()

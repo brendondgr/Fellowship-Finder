@@ -51,7 +51,8 @@ class ProfellowBot:
 
         # Load login credentials from a JSON file
         with open(os.path.join(self.configs_path, "login.json"), "r") as f:
-            self.login_data = json.load(f)
+            login_data = json.load(f)
+        self.profellow_login_data = login_data.get("profellow", {})
 
         self.categories_data = filters_data["categories"]
 
@@ -126,13 +127,13 @@ class ProfellowBot:
         email_input = WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located((By.ID, "wpforms-106652-field_1"))
         )
-        for char in self.login_data["email"]:
+        for char in self.profellow_login_data.get("username-email", ""):
             email_input.send_keys(char)
             time.sleep(random.uniform(0.01, 0.05))
 
         # Find the password input and type the password
         password_input = self.driver.find_element(By.ID, "wpforms-106652-field_2")
-        for char in self.login_data["password"]:
+        for char in self.profellow_login_data.get("password", ""):
             password_input.send_keys(char)
             time.sleep(random.uniform(0.01, 0.05))
 

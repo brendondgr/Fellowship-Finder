@@ -58,7 +58,10 @@
                 </h2>
                 <div class="flex items-center gap-x-2">
                     <input type="password" id="api-key-input" placeholder="Enter your API key" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" value="{% if api_key %}{{ api_key }}{% endif %}">
-                    <button id="save-api-key-btn" class="text-sm font-medium py-2 px-4 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-200 whitespace-nowrap">Save Key</button>
+                    <button id="save-api-key-btn" class="inline-flex items-center text-sm font-medium py-2 pl-3 pr-4 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-200 whitespace-nowrap">
+                        <img src="{{ url_for('static', filename='svg/save.svg') }}" alt="Save" class="h-4 w-4 mr-2 filter-white">
+                        Save
+                    </button>
                 </div>
             </div>
         </div>

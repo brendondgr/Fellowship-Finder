@@ -95,7 +95,37 @@ function setupKeywordLogicToggle() {
     });
 }
 
-// --- 4. Form Submission ---
+// --- 4. Save API Key ---
+function setupSaveApiKeyButton() {
+    const saveBtn = document.getElementById('save-api-key-btn');
+    if (!saveBtn) return;
+
+    saveBtn.addEventListener('click', () => {
+        const apiKeyInput = document.getElementById('api-key-input');
+        if (!apiKeyInput) return;
+
+        const apiKey = apiKeyInput.value.trim();
+
+        const originalButtonText = saveBtn.innerHTML;
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = 'Saving...';
+
+        saveApiKey(apiKey)
+            .then(() => {
+                alert('API key saved successfully!');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred: ' + error.message);
+            })
+            .finally(() => {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalButtonText;
+            });
+    });
+}
+
+// --- 5. Form Submission ---
 function setupFormSubmission() {
     const beginSearchingBtn = document.getElementById('begin-searching-btn');
     if (!beginSearchingBtn) return;
@@ -237,6 +267,7 @@ window.initializeScrapeForm = function() {
     setupBrowserSelection();
     setupCollapsibleSections();
     setupKeywordLogicToggle();
+    setupSaveApiKeyButton();
     setupFormSubmission();
 };
 

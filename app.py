@@ -394,6 +394,48 @@ def manage_api_key():
             print(f"[POST /api/api_key] Error saving API key: {e}")
             return jsonify({"success": False, "error": str(e)}), 500
 
+@app.route('/api/login/profellow', methods=['GET', 'POST'])
+def manage_profellow_login():
+    login_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'configs', 'login.json')
+    
+    if request.method == 'GET':
+        try:
+            with open(login_path, 'r') as f:
+                login_data = json.load(f)
+            profellow_creds = login_data.get('profellow', {})
+            return jsonify(profellow_creds)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return jsonify({})
+
+    if request.method == 'POST':
+        try:
+            data = request.json
+            email = data.get('email')
+            password = data.get('password')
+
+            if not email or not password:
+                return jsonify({"success": False, "error": "Email and password are required."}), 400
+
+            login_data = {}
+            if os.path.exists(login_path):
+                try:
+                    with open(login_path, 'r') as f:
+                        login_data = json.load(f)
+                except json.JSONDecodeError:
+                    pass # file is corrupt or empty
+
+            login_data['profellow'] = {
+                "username-email": email,
+                "password": password
+            }
+
+            with open(login_path, 'w') as f:
+                json.dump(login_data, f, indent=4)
+            
+            return jsonify({"success": True, "message": "Saved Login for Profellow"})
+        except Exception as e:
+            return jsonify({"success": False, "error": str(e)}), 500
+
 @app.route('/scrape', methods=['GET', 'POST'])
 def scrape():
     if request.method == 'GET':

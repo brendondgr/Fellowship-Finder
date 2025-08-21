@@ -162,6 +162,34 @@ class DataProcessor:
 
         if os.path.exists(self.processed_fellowship_csv_path):
             processed_df = pd.read_csv(self.processed_fellowship_csv_path)
+            
+            # Ensure all necessary columns exist
+            expected_cols = [
+                'title', 'location', 'continent', 'deadline', 'link', 'description', 
+                'subjects', 'total_compensation', 'other_funding', 'length_in_years', 
+                'interest_rating', 'favorited', 'show'
+            ]
+            for col in expected_cols:
+                if col not in processed_df.columns:
+                    # Add missing column with a default value
+                    if col in ['favorited', 'length_in_years']:
+                        processed_df[col] = 0
+                    elif col == 'show':
+                        processed_df[col] = 1
+                    elif col == 'interest_rating':
+                        processed_df[col] = 0.0
+                    elif col == 'total_compensation':
+                        processed_df[col] = "N/A"
+                    elif col == 'subjects':
+                        processed_df[col] = []
+                    elif col == 'other_funding':
+                        processed_df[col] = ""
+                    else:
+                        processed_df[col] = ""
+            
+            # Save the updated DataFrame
+            processed_df.to_csv(self.processed_fellowship_csv_path, index=False)
+            print(f"Updated processed_fellowship_list.csv with missing columns.")
         else:
             processed_df = pd.DataFrame()
 
@@ -170,7 +198,17 @@ class DataProcessor:
         # Wrap the loop with tqdm for a progress bar
         for index, row in tqdm(unprocessed_df.iterrows(), total=unprocessed_df.shape[0], desc="Refining Fellowships"):
             try:
-                refined_data = refiner.refine(row)
+                if refiner.enabled:
+                    refined_data = refiner.refine(row)
+                else: # No refiner, create data with defaults
+                    refined_data = {
+                        "subjects": [],
+                        "total_compensation": "N/A",
+                        "other_funding": "",
+                        "length_in_years": 0,
+                        "interest_rating": 0.0,
+                    }
+
                 if refined_data:
                     # Combine raw data with refined data
                     combined_data = row.to_dict()

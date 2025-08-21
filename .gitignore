@@ -8,6 +8,7 @@ genai.ipynb
 api_key.json
 .kiro/
 .python-version
+filters.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

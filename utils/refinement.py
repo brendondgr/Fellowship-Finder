@@ -6,45 +6,58 @@ import time
 from tqdm import tqdm
 
 class GeminiRefiner:
-    def __init__(self, model_name="gemini-2.5-flash-lite"):
-        # Load the Gemini API key from the api_key.json file
+    def __init__(self, model_name="gemini-pro"):
+        self.enabled = False
         api_key_path = 'configs/api_key.json'
-        if not os.path.exists(api_key_path):
-            raise FileNotFoundError(f"API key file not found at {api_key_path}. Please create it.")
-        
-        with open(api_key_path, 'r') as f:
-            api_key_data = json.load(f)
-            gemini_api_key = api_key_data.get('gemini_api_key')
-            if not gemini_api_key:
-                raise ValueError("`gemini_api_key` not found in `configs/api_key.json`")
-        
+        gemini_api_key = None
+
+        if os.path.exists(api_key_path):
+            try:
+                with open(api_key_path, 'r') as f:
+                    api_key_data = json.load(f)
+                    gemini_api_key = api_key_data.get('gemini_api_key')
+            except (json.JSONDecodeError, IOError) as e:
+                print(f"Warning: Could not read API key file at {api_key_path}. Error: {e}")
+                return
+
+        if not gemini_api_key:
+            print("Warning: `gemini_api_key` not found or is empty in `configs/api_key.json`. GeminiRefiner will be disabled.")
+            return
+
+        self.enabled = True
         self.model = model_name
         
         if "flash" in self.model.lower():
-            self.rate_limit_interval = 60 / 10  # 10 requests per minute
+            self.rate_limit_interval = 60 / 10
         elif "pro" in self.model.lower():
-            self.rate_limit_interval = 60 / 5   # 5 requests per minute
+            self.rate_limit_interval = 60 / 5
         else:
-            self.rate_limit_interval = 0  # No rate limit
+            self.rate_limit_interval = 0
         
         self.last_request_time = 0
         
-        self.client = genai.Client(
-            api_key=gemini_api_key
-        )
+        try:
+            self.client = genai.Client(api_key=gemini_api_key)
+        except Exception as e:
+            print(f"Failed to initialize Gemini client: {e}")
+            self.enabled = False
+            return
         
-        # Load system instructions from filters.json
         filters_path = 'configs/filters.json'
         if not os.path.exists(filters_path):
-            raise FileNotFoundError(f"Filters file not found at {filters_path}. Please create it.")
-        
-        with open(filters_path, 'r') as f:
-            filters_data = json.load(f)
-            self.system_instructions = filters_data.get('system_instructions', '')
-            if not self.system_instructions:
-                print("Warning: `system_instructions` not found or empty in `configs/filters.json`")
+            print(f"Warning: Filters file not found at {filters_path}. System instructions will be empty.")
+            self.system_instructions = ''
+        else:
+            with open(filters_path, 'r') as f:
+                filters_data = json.load(f)
+                self.system_instructions = filters_data.get('system_instructions', '')
+                if not self.system_instructions:
+                    print("Warning: `system_instructions` not found or empty in `configs/filters.json`")
                 
     def refine(self, row):
+        if not self.enabled:
+            return None
+
         if self.rate_limit_interval > 0:
             current_time = time.time()
             time_since_last_request = current_time - self.last_request_time

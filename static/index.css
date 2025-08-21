@@ -15,7 +15,19 @@ body {
 }
 
 .swipe-out {
-    animation: swipeOut 0.5s forwards;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: transform 0.5s ease-out, opacity 0.5s ease;
+}
+
+.filter-white {
+    filter: brightness(0) invert(1);
+}
+
+.password-toggle-retracted {
+    /* padding: 3px 9px; */
+    margin-top: 2px;
+    margin-bottom: 2px;
 }
 
 .favorite-btn.favorited svg {
