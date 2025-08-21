@@ -1,7 +1,3 @@
-/* Custom styles for tooltips */
-.group:hover .group-hover\:opacity-100 {
-    opacity: 1;
-}
 /* Base selected state for buttons */
 .browser-btn.selected {
     color: white;

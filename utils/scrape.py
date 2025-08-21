@@ -181,48 +181,61 @@ class ProfellowBot:
             return
 
         category_keys = list(self.categories_data.keys())
+        processed_categories = set()
 
-        for i, block in enumerate(filter_blocks):
-            if i >= len(category_keys):
-                print(f"Warning: No category key in filters.json for filter block {i+1}. Skipping.")
+        for category_key in category_keys:
+            if category_key in processed_categories:
                 continue
-            
-            category_key = category_keys[i]
-            items_to_select = self.categories_data[category_key]
 
+            items_to_select = self.categories_data[category_key]
             if not items_to_select:
                 print(f"No items to select for category '{category_key}'. Skipping.")
                 continue
 
-            print(f"Processing filter block {i+1}/{len(filter_blocks)}: '{category_key}' which has title '{block.text}'")
-
-            try:
-                # Re-locate the filter block to ensure it's fresh
-                clickable_block = block
-
-                # --- 1. Open the filter block if it's not already open ---
-                # A simple way to check if it's open is to see if checkboxes are visible.
-                try:
-                    WebDriverWait(clickable_block, 2).until(
-                        EC.visibility_of_element_located((By.CLASS_NAME, "facetwp-checkbox"))
-                    )
-                    print("Filter block is already open.")
-                except TimeoutException:
-                    clickable_block.click()
-                    print(f"Clicked filter block: {category_key}")
-                    time.sleep(1.5) # Wait for animation
-
-                # --- 2. Process checkboxes within this block ---
-                self._process_checkboxes_for_category(clickable_block, items_to_select)
-
-                # # --- 3. Close the filter block by clicking the toggle again ---
-                # self._click_facetwp_toggle(clickable_block)
-                # time.sleep(1) # Wait for animation
-
-            except (TimeoutException, StaleElementReferenceException, NoSuchElementException) as e:
-                print(f"Could not process filter block '{category_key}' due to: {e}")
-                # It might be good to refresh the page or take other recovery actions here
+            found_block = False
+            for i, block in enumerate(filter_blocks):
+                # If the category is "Fellowship Type" then change this "category_key" to "Type"
+                if category_key.lower() == "fellowship type":
+                    category_key = "Type"
+                    
+                # Change "Residency Requirements" to "Residency Requirement"
+                if category_key.lower() == "residency requirements":
+                    category_key = "Residency Requirement"
                 
+                # Change "Citizenship Requirements" to "Citizenship Requirement"
+                if category_key.lower() == "citizenship requirements":
+                    category_key = "Citizenship Requirement"
+
+                if category_key.lower() == block.text.lower():
+                    print(f"Processing filter block {i+1}/{len(filter_blocks)}: '{category_key}' which has title '{block.text}'")
+                    try:
+                        # Re-locate the filter block to ensure it's fresh
+                        clickable_block = block
+
+                        # --- 1. Open the filter block if it's not already open ---
+                        try:
+                            WebDriverWait(clickable_block, 2).until(
+                                EC.visibility_of_element_located((By.CLASS_NAME, "facetwp-checkbox"))
+                            )
+                            print("Filter block is already open.")
+                        except TimeoutException:
+                            clickable_block.click()
+                            print(f"Clicked filter block: {category_key}")
+                            time.sleep(1.5) # Wait for animation
+
+                        # --- 2. Process checkboxes within this block ---
+                        self._process_checkboxes_for_category(clickable_block, items_to_select)
+                        processed_categories.add(category_key)
+                        found_block = True
+                        break
+
+                    except (TimeoutException, StaleElementReferenceException, NoSuchElementException) as e:
+                        print(f"Could not process filter block '{category_key}' due to: {e}")
+                        # It might be good to refresh the page or take other recovery actions here
+            
+            if not found_block:
+                print(f"Warning: No matching filter block found for category key '{category_key}'. Skipping.")
+
     def _process_checkboxes_for_category(self, filter_block, items_to_select):
         processed_checkbox_texts = set()
         

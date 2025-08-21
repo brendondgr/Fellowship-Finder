@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Front Page Prototype</title>
+    <title>Fellowship Finder</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter -->
@@ -178,20 +178,16 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                         </svg>
                                     </a>
-                                    <form method="POST" action="/fellowship/{{ fellowship.id }}/favorite" style="display: inline;">
-                                        <button type="submit" class="favorite-btn p-2 rounded-full bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 transition-colors {% if fellowship.favorited %}favorited{% endif %}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                            </svg>
-                                        </button>
-                                    </form>
-                                    <form method="POST" action="/fellowship/{{ fellowship.id }}/remove" style="display: inline;">
-                                        <button type="submit" class="remove-btn p-2 rounded-full bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 transition-colors" onclick="return confirm('Are you sure you want to remove this fellowship?')">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
-                                    </form>
+                                    <button type="button" class="favorite-btn p-2 rounded-full bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 transition-colors {% if fellowship.favorited %}favorited{% endif %}" data-id="{{ fellowship.id }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" class="remove-btn p-2 rounded-full bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 transition-colors" data-id="{{ fellowship.id }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                             <!-- Second Row: Description -->
@@ -373,7 +369,7 @@
 
     <!-- Scrape Modal -->
     <div id="scrape-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div id="scrape-modal-content" class="p-8">
+        <div id="scrape-modal-content">
             <!-- Content from scrape.html will be loaded here -->
         </div>
     </div>
@@ -427,11 +423,10 @@
                         .then(html => {
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(html, 'text/html');
-                            const content = doc.querySelector('.p-6.sm\\:p-8.w-full.max-w-5xl.mx-auto');
+                            const bodyContent = doc.body;
                             
-                            if (content) {
-                                scrapeModalContent.innerHTML = '';
-                                scrapeModalContent.appendChild(content);
+                            if (bodyContent) {
+                                scrapeModalContent.innerHTML = bodyContent.innerHTML;
                                 window.initializeScrapeForm();
                             } else {
                                 scrapeModalContent.innerHTML = '<div class="bg-white p-8 rounded-lg text-red-500">Could not load scrape options. Content not found in response.</div>';
@@ -458,6 +453,80 @@
                 });
             }
         });
+    </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Undo functionality
+        const undoContainer = document.getElementById('undo-container');
+        const undoBtn = document.getElementById('undo-btn');
+        let lastRemovedId = null;
+        let undoTimeout;
+
+        function showUndo(fellowshipId) {
+            lastRemovedId = fellowshipId;
+            undoContainer.classList.remove('hidden');
+            clearTimeout(undoTimeout);
+            undoTimeout = setTimeout(() => {
+                undoContainer.classList.add('hidden');
+            }, 5000); // Hide after 5 seconds
+        }
+
+        undoBtn.addEventListener('click', () => {
+            if (lastRemovedId) {
+                fetch(`/api/fellowships/${lastRemovedId}/undo`, {
+                    method: 'POST'
+                }).then(response => response.json()).then(data => {
+                    if (data.success) {
+                        const card = document.querySelector(`[data-id="${lastRemovedId}"]`);
+                        if (card) {
+                            card.classList.remove('swipe-out');
+                            card.style.display = 'block'; // Or original display
+                            const totalSpan = document.getElementById('total-opportunities');
+                            if(totalSpan) totalSpan.textContent = parseInt(totalSpan.textContent) + 1;
+                        }
+                        undoContainer.classList.add('hidden');
+                        lastRemovedId = null;
+                    }
+                });
+            }
+        });
+
+        // Favorite and Remove functionality
+        document.querySelectorAll('.favorite-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const fellowshipId = this.dataset.id;
+                this.classList.toggle('favorited');
+                const isFavorited = this.classList.contains('favorited');
+
+                fetch(`/api/fellowships/${fellowshipId}/favorite`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ favorited: isFavorited ? 1 : 0 })
+                });
+            });
+        });
+
+        document.querySelectorAll('.remove-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const fellowshipId = this.dataset.id;
+                const card = this.closest('.bg-white');
+
+                fetch(`/api/fellowships/${fellowshipId}/remove`, {
+                    method: 'POST'
+                }).then(response => response.json()).then(data => {
+                    if (data.success) {
+                        card.classList.add('swipe-out');
+                        setTimeout(() => {
+                            card.style.display = 'none';
+                            showUndo(fellowshipId);
+                            const totalSpan = document.getElementById('total-opportunities');
+                            if(totalSpan) totalSpan.textContent = parseInt(totalSpan.textContent) - 1;
+                        }, 500); // Corresponds to animation duration
+                    }
+                });
+            });
+        });
+    });
     </script>
 </body>
 </html>
