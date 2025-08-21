@@ -1,83 +1,113 @@
-<div align="center">
 # Fellowship Finder
 
-Fellowship Finder is a web scraping and data management application designed to help users discover and organize fellowship opportunities from ProFellow.com. Further operations will be added in the future, such as pulling from private resources, job boards, and other large platforms.
+<div align="center">
+
+A web scraping and data management application to discover, organize, and refine fellowship opportunities from across the web.
+
 </div>
 
-## Core Purpose
-
-Fellowship Finder is designed to:
-
-- **Automate Discovery**: Streamline the process of finding fellowship opportunities through advanced web scraping.
-- **User-Friendly Management**: Offer an intuitive interface for organizing and managing fellowship data.
-- **Enhanced Organization**: Enable features like favoriting, removal, and categorization of opportunities.
-- **AI-Powered Refinement**: Leverage artificial intelligence to refine and improve the quality of scraped data.
-
-
-## Visual Interface
+<br>
 
 <div align="center">
-    <img src="images/both_pages.png" alt="Fellowship Finder Interface">
+<img src="images/both_pages.png" alt="Fellowship Finder Interface" width="800">
 </div>
 
+## ✨ About The Project
 
-## Technology Stack
-- **Backend**: Flask, Selenium, Pandas, Google Generative AI
-- **Frontend**: Jinja2, Tailwind CSS, Vanilla JavaScript
-- **Storage**: CSV and JSON files
+Fellowship Finder automates the tedious process of searching for professional fellowships. It began by targeting ProFellow.com and is expanding to include private resources, job boards, and other major platforms. The core mission is to provide a centralized, efficient tool for users to discover and manage opportunities with the help of AI-powered data refinement.
 
-## Common Commands
-### Setup
-#### UV Set-Up
-```bash
-# Install dependencies
-uv sync  # Preferred
-pip install -r requirements.txt  # Fallback
-uv run main.py
-```
+## 🚀 Key Features
 
-#### Conda Set-Up
-```bash
-# Install dependencies
-conda create -n fellowship python=3.10
-conda activate fellowship
-python app.py
-```
+* **🤖 Automated Discovery**: Deploys web scrapers to automatically find and retrieve fellowship listings.
 
-### Data Operations
-```bash
-python data_retrieval.py --browser firefox  # Scrape with browser
-python data_retrieval.py --refine  # Process raw data
-python data_retrieval.py --cleartmp  # Clean temporary files
-python data_retrieval.py --cleanup  # Full cleanup
-python data_retrieval.py --notify-app  # Scrape and notify app
-```
+* **🧠 AI-Powered Refinement**: Uses Google's Generative AI to clean, standardize, and enhance the quality of scraped data.
 
-## Project Structure
+* **🗂️ User-Friendly Management**: An intuitive web interface for organizing, favoriting, and filtering opportunities.
+
+* **⚙️ Streamlined Workflow**: Simple command-line operations for data retrieval, processing, and cleanup.
+
+## 🛠️ Built With
+
+* **Backend**: Flask, Selenium, Pandas, Google Generative AI
+
+* **Frontend**: Jinja2, Tailwind CSS, Vanilla JavaScript
+
+* **Data Storage**: CSV and JSON files
+
+## 🏁 Getting Started
+
+Follow these steps to get a local copy up and running.
+
+### Prerequisites
+
+* Python 3.10+
+
+* A modern web browser (e.g., Firefox, Chrome)
+
+* `uv` or `conda` package manager
+
+### Installation
+
+1. **Clone the repository:**
+
+   ```
+   git clone [https://github.com/your-username/Fellowship-Finder.git](https://github.com/your-username/Fellowship-Finder.git)
+   cd Fellowship-Finder
+   ```
+
+2. **Set up your API keys and credentials:**
+
+   * Copy your Google Gemini API key into `configs/api_key.json`.
+
+   * Add your ProFellow.com login details to `configs/login.json` (this file is git-ignored).
+
+3. **Install dependencies using your preferred package manager:**
+
+   **Option A: `uv` (Recommended)**
+
+   ```
+   # Install dependencies
+   uv sync
+   
+   # Run the application
+   uv run python app.py
+   ```
+
+   **Option B: `conda`**
+
+   ```
+   # Create and activate a new environment
+   conda create -n fellowship python=3.10
+   conda activate fellowship
+   
+   # Install dependencies
+   pip install -r requirements.txt
+   
+   # Run the application
+   python app.py
+   ```
+
+## 🖥️ Usage
+
+The `data_retrieval.py` script provides a command-line interface for all data operations.
+
+| **Command** | **Description** | 
+|---|---|
+| `python data_retrieval.py --browser [name]` | Scrape for new data using the specified browser (e.g., `firefox`). | 
+| `python data_retrieval.py --refine` | Process and clean the raw data using the AI refinement module. | 
+| `python data_retrieval.py --notify-app` | Run the full scrape and refinement pipeline. | 
+| `python data_retrieval.py --cleartmp` | Clean out temporary files from the `tmp/` directory. | 
+| `python data_retrieval.py --cleanup` | Perform a full cleanup of all temporary and raw data files. | 
+
+## 📂 Project Structure
 
 ```
 Fellowship-Finder/
 ├── app.py                 # Main Flask application
-├── data_retrieval.py      # Web scraping and data processing CLI
-├── config.ini             # Path configurations
-├── requirements.txt       # Dependencies
-├── pyproject.toml         # Project configuration
-├── configs/               # Configuration files
-│   ├── filters.json       # Scraping filters
-│   ├── api_key.json       # Google Gemini API key
-│   └── login.json         # ProFellow.com credentials (excluded from repo)
-├── data/                  # Data directories
-│   ├── raw/               # Raw scraped data
-│   └── processed/         # Refined data
-├── tmp/                   # Temporary files
-├── templates/             # Web interface templates
-│   ├── index.html
-│   └── scrape.html
+├── data_retrieval.py      # CLI for data scraping and processing
+├── requirements.txt       # Project dependencies
+├── configs/               # Configuration files (API keys, filters)
+├── data/                  # Raw and processed data
 ├── static/                # Static assets (CSS, JS, icons)
-├── utils/                 # Core logic
-│   ├── data_manager.py    # CSV operations and filtering
-│   ├── scrape.py          # Selenium-based scraper
-│   ├── data.py            # Raw data processing
-│   ├── refinement.py      # AI-powered data refinement
-│   └── files_folders.py   # File and directory management
-```
+├── templates/             # Jinja2 HTML templates
+└── utils/                 # Core application logic
