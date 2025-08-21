@@ -370,9 +370,25 @@ def manage_api_key():
     if request.method == 'POST':
         try:
             new_api_key_data = request.json
-            print(f"[POST /api/api_key] Saving API key data to: {api_key_path}")
+            if 'gemini_api_key' not in new_api_key_data:
+                return jsonify({"success": False, "error": "'gemini_api_key' not in request."}), 400
+
+            print(f"[POST /api/api_key] Saving API key to: {api_key_path}")
+
+            config_data = {}
+            if os.path.exists(api_key_path):
+                try:
+                    with open(api_key_path, 'r') as f:
+                        config_data = json.load(f)
+                except json.JSONDecodeError:
+                    pass # File is empty/corrupt, will be overwritten
+            
+            # Update the specific key
+            config_data['gemini_api_key'] = new_api_key_data['gemini_api_key']
+            
             with open(api_key_path, 'w') as f:
-                json.dump(new_api_key_data, f, indent=4)
+                json.dump(config_data, f, indent=4)
+
             return jsonify({"success": True, "message": "API key saved successfully."})
         except Exception as e:
             print(f"[POST /api/api_key] Error saving API key: {e}")

@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='scrape.css') }}">
 </head>
@@ -20,7 +21,7 @@
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex-shrink-0">
-                    <h1 class="text-2xl font-bold text-gray-800">ProFellow Data</h1>
+                    <h1 class="text-2xl font-bold text-gray-800">Fellowship Finder</h1>
                 </div>
                 <nav class="hidden md:flex md:space-x-8 justify-center">
                     
@@ -270,7 +271,8 @@
                         </svg>
                         <h3 class="text-lg font-bold mb-2">No Processed Data Found!</h3>
                         <p class="mb-4">It looks like there's no fellowship data available yet.</p>
-                        <p class="text-sm">Please press the "Scrape" button at the top of the screen to scrape and process fellowship data from ProFellow.com.</p>
+                        <p class="text-sm">Please press the "Scrape" button at the top of the screen to scrape and process fellowship data.</p>
+                        <p class="text-sm">Keep track of your Terminal. Once completed, you will have to press the "Refresh" button in this section or restart the application.</p>
                     </div>
                 {% else %}
                     <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-6 py-8 rounded-lg text-center" role="alert">

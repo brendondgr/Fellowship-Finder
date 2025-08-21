@@ -23,9 +23,9 @@
 
         <!-- Main Header and Description -->
         <div class="text-center mb-8">
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">ProFellow Website Scraping</h1>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Fellowship Finder and Scraper</h1>
             <p class="mt-2 text-sm text-gray-600 max-w-3xl mx-auto">
-                Below are a list of options available on the ProFellow website. Select which ones apply to you. Options may be pre-selected based on your previous choices if you have utilized this tool before. Otherwise, please select items in each category. If you leave a category blank, then this category will be skipped.
+                Below are a list of options available for finding fellowships. Select which ones apply to you. Options may be pre-selected based on your previous choices if you have utilized this tool before. Otherwise, please select items in each category. If you leave a category blank, then this category will be skipped.
             </p>
         </div>
         
@@ -51,12 +51,15 @@
                     <div class="group relative ml-2">
                         <i class="fa-solid fa-circle-info text-gray-400"></i>
                         <div class="absolute bottom-full mb-2 w-72 bg-gray-800 text-white text-xs rounded-lg py-2 px-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                            To save your API key for future use, create an <code>api_key.json</code> file in the <code>configs</code> folder with the format:<br><code>{"gemini_api_key": "YOUR_KEY"}</code>.<br>Otherwise, the key must be entered manually each time.
+                            Enter your Gemini API key here and click "Save Key" to store it permanently in <code>configs/api_key.json</code>. The model used is "Gemini Flash Lite", which permits ~1000 API calls daily and adheres to RPM limits.
                             <svg class="absolute text-gray-800 h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
                         </div>
                     </div>
                 </h2>
-                 <input type="password" id="api-key-input" placeholder="Enter your API key" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" value="{% if api_key %}{{ api_key }}{% endif %}">
+                <div class="flex items-center gap-x-2">
+                    <input type="password" id="api-key-input" placeholder="Enter your API key" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" value="{% if api_key %}{{ api_key }}{% endif %}">
+                    <button id="save-api-key-btn" class="text-sm font-medium py-2 px-4 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-200 whitespace-nowrap">Save Key</button>
+                </div>
             </div>
         </div>
 
@@ -217,7 +220,7 @@
                             <div class="group relative ml-2">
                                 <i class="fa-solid fa-circle-info text-gray-400"></i>
                                 <div class="absolute bottom-full mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg py-2 px-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                                    Key Words. If a Fellowship has these keywords, it will not be present in the final fellowship list.
+                                    Type keywords separated by commas (e.g., "research, data science"). If "AND" is selected, fellowships must contain ALL keywords to be filtered out. If "OR" is selected, fellowships must contain ANY of the keywords to be filtered out.
                                     <svg class="absolute text-gray-800 h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
                                 </div>
                             </div>
@@ -238,7 +241,9 @@
         <div class="mt-8 pt-8 border-t border-gray-200" data-category="system_instructions">
              <h2 class="text-lg font-semibold text-gray-800 mb-4 text-center">System Instructions</h2>
              <p class="text-sm text-gray-600 max-w-3xl mx-auto text-center">
-                Please provide your interests in-depth. The fellowship information will be passed through API to a LLM. The LLM will give a rating that essentially determines whether it thinks you'd be interested or not. The more descriptive you are about your like and dislikes, the more accurate it will be.
+                Please provide your interests in-depth. The fellowship information will be passed through API to a LLM. The LLM will give a rating that essentially determines whether it thinks you'd be interested or not.
+                The more descriptive you are about your like and dislikes, the more accurate it will be. <br/><br/>
+                NOTE: If no Gemini API Key is provided, System Instructions are not needed, as no rating can be given.
              </p>
              <textarea id="system-instructions-textarea" rows="4" class="mt-4 w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" placeholder="Describe your ideal fellowship, research interests, career goals, etc...">{{ filters.get('system_instructions', '') }}</textarea>
         </div>
