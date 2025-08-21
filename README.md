@@ -51,7 +51,14 @@ Follow these steps to get a local copy up and running.
 1. **Clone the repository:**
 
    ```
-   git clone [https://github.com/your-username/Fellowship-Finder.git](https://github.com/your-username/Fellowship-Finder.git)
+   git clone https://github.com/brendondgr/Fellowship-Finder.git
+   cd Fellowship-Finder
+   ```
+
+   Alternative (SSH):
+
+   ```
+   git clone git@github.com:brendondgr/Fellowship-Finder.git
    cd Fellowship-Finder
    ```
 
@@ -70,7 +77,7 @@ Follow these steps to get a local copy up and running.
    uv sync
    
    # Run the application
-   uv run python app.py
+   uv run app.py
    ```
 
    **Option B: `conda`**
@@ -95,7 +102,6 @@ The `data_retrieval.py` script provides a command-line interface for all data op
 |---|---|
 | `python data_retrieval.py --browser [name]` | Scrape for new data using the specified browser (e.g., `firefox`). | 
 | `python data_retrieval.py --refine` | Process and clean the raw data using the AI refinement module. | 
-| `python data_retrieval.py --notify-app` | Run the full scrape and refinement pipeline. | 
 | `python data_retrieval.py --cleartmp` | Clean out temporary files from the `tmp/` directory. | 
 | `python data_retrieval.py --cleanup` | Perform a full cleanup of all temporary and raw data files. | 
 
