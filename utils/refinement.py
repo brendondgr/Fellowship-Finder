@@ -6,7 +6,7 @@ import time
 from tqdm import tqdm
 
 class GeminiRefiner:
-    def __init__(self, model_name="gemini-pro"):
+    def __init__(self, model_name="gemini-2.5-flash-lite"):
         self.enabled = False
         api_key_path = 'configs/api_key.json'
         gemini_api_key = None
