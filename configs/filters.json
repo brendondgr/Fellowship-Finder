@@ -1,27 +1,40 @@
 {
-    "Browsing": "chrome",
+    "Browsing": "firefox",
     "categories": {
         "Fellowship Type": [
-            
+            "Doctoral Fellowships"
         ],
         "Discipline": [
-            
+            "Science",
+            "Medicine / Health Sciences",
+            "Technology",
+            "Engineering",
+            "Business"
         ],
         "Location": [
-            
+            "North America"
         ],
         "Citizenship Requirement": [
-            
+            "United States",
+            "Any"
         ],
         "Residency Requirement": [
-            
+            "United States",
+            "Any"
         ]
     },
     "keywords": {
         "type": "OR",
         "words": [
-            
+            "data science",
+            "artificial intelligence",
+            "machine learning",
+            "computer science",
+            "computational science",
+            "high-performance computing",
+            "high performance computing",
+            "computer vision"
         ]
     },
-    "system_instructions": ""
+    "system_instructions": "I am deeply invested in the field of Artificial Intelligence and its practical applications across diverse domains. My primary research interests lie at the intersection of AI and healthcare, with a particular focus on robotic surgery. In addition to this core interest, I also enjoy exploring personalized medicine and investigating the potential of large language models (LLMs) in a variety of contexts. Nonetheless, my work remains centered on areas such as robotic surgery, medical imaging, and medical LLMs. I am not interested in pursuing research related to finance, conservation, or bioinformatics/systems biology.\n\nFor guidance on rating:\n(+2 Stars) For being related to Artificial Intelligence, Machine Learning, Deep learning, Computer Science, or Large Language Models.\n(+2 Stars) For being related to Medicine, Surgery, Medical Imaging, or Healthcare.\n(+1 Star) Funding that entails 2+ Years.\n\nDo not rate anything higher than 2 stars if not directly related to AI, ML, DL, CS, LLMs, Healthcare, Medicine, etc."
 }

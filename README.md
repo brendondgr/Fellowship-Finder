@@ -1,4 +1,6 @@
-# Fellowship Finder
+<div align="center">
+<img src="images/title.png" alt="Fellowship Finder" width="600">
+</div>
 
 <div align="center">
 
