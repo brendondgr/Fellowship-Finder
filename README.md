@@ -20,13 +20,13 @@ Fellowship Finder automates the tedious process of searching for professional fe
 
 ## 🚀 Key Features
 
-* **🤖 Automated Discovery**: Deploys web scrapers to automatically find and retrieve fellowship listings.
+* **Automated Discovery**: Deploys web scrapers to automatically find and retrieve fellowship listings.
 
-* **🧠 AI-Powered Refinement**: Uses Google's Generative AI to clean, standardize, and enhance the quality of scraped data.
+* **AI-Powered Refinement**: Uses Google's Generative AI to clean, standardize, and enhance the quality of scraped data.
 
-* **🗂️ User-Friendly Management**: An intuitive web interface for organizing, favoriting, and filtering opportunities.
+* **User-Friendly Management**: An intuitive web interface for organizing, favoriting, and filtering opportunities.
 
-* **⚙️ Streamlined Workflow**: Simple command-line operations for data retrieval, processing, and cleanup.
+* **Streamlined Workflow**: Simple command-line operations for data retrieval, processing, and cleanup.
 
 ## 🛠️ Built With
 

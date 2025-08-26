@@ -9,6 +9,7 @@ api_key.json
 .kiro/
 .python-version
 filters.json
+*.psd
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
