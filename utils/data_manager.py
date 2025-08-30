@@ -76,6 +76,10 @@ class DataManager:
             self.df['length_in_years'] = 0
             updated = True
 
+        if 'announced' not in self.df.columns:
+            self.df['announced'] = "no"
+            updated = True
+
         if updated:
             self.save_fellowship_data()
 

@@ -167,7 +167,7 @@ class DataProcessor:
             expected_cols = [
                 'title', 'location', 'continent', 'deadline', 'link', 'description', 
                 'subjects', 'total_compensation', 'other_funding', 'length_in_years', 
-                'interest_rating', 'favorited', 'show'
+                'interest_rating', 'favorited', 'show', 'announced'
             ]
             for col in expected_cols:
                 if col not in processed_df.columns:
@@ -184,6 +184,8 @@ class DataProcessor:
                         processed_df[col] = []
                     elif col == 'other_funding':
                         processed_df[col] = ""
+                    elif col == 'announced':
+                        processed_df[col] = "no"
                     else:
                         processed_df[col] = ""
             
@@ -256,11 +258,12 @@ class DataProcessor:
         # Add 'favorited' and 'show' if they are missing
         data.setdefault('favorited', 0)
         data.setdefault('show', 1)
+        data.setdefault('announced', 'no')
 
         # Clean and validate data types
         try:
             # String fields
-            for key in ["title", "location", "continent", "link", "description", "other_funding"]:
+            for key in ["title", "location", "continent", "link", "description", "other_funding", "announced"]:
                 data[key] = str(data[key])
 
             # Deadline: should be in YYYY-MM format
