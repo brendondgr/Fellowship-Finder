@@ -137,6 +137,10 @@ class ProfellowBot:
             password_input.send_keys(char)
             time.sleep(random.uniform(0.01, 0.05))
 
+                    # Scroll down slightly after entering credentials
+        self.driver.execute_script("window.scrollBy(0, 100);")
+        time.sleep(random.uniform(0.5, 1.5)) # Add a small delay after scrolling
+
         # Add a brief delay before clicking the login button
         time.sleep(random.uniform(0.4, 1.3))
 
