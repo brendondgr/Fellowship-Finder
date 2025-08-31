@@ -77,6 +77,8 @@ class ProfellowBot:
             print("Safari WebDriver initialized.")
         else:
             raise ValueError(f"Unsupported browser: '{self.browser}'. Please choose 'firefox', 'chrome', 'edge', or 'safari'.")
+        # Fullscreen the window
+        self.driver.fullscreen_window()
         
     def _are_categories_same(self):
         """Deep compares the filters.json files in configs/ and tmp/."""
@@ -122,6 +124,7 @@ class ProfellowBot:
     def _login(self):
         self.driver.get(self.LOGIN_URL)
         print("Navigated to login page.")
+        self.driver.execute_script("document.body.style.zoom = '0.5';")
 
         # Wait for the email input to be visible and type the email
         email_input = WebDriverWait(self.driver, 10).until(
@@ -361,10 +364,12 @@ class ProfellowBot:
                 print("Using cached link.")
                 self._login()
                 self.driver.get(cached_link)
+                self.driver.execute_script("document.body.style.zoom = '0.5';")
                 print(f"Navigated to cached link: {cached_link}")
             else:
                 print("Performing a full scrape.")
                 self._login()
+                self.driver.execute_script("document.body.style.zoom = '0.5';")
                 self._click_filter_button()
                 time.sleep(1)
                 filter_blocks = self._get_filter_blocks()
@@ -410,8 +415,8 @@ class ProfellowBot:
             time.sleep(2.0)  # Give time for page to load after scroll
 
             # Scroll up a small amount to bring "facetwp-load-more" into view
-            self.driver.execute_script("window.scrollBy(0, -750);")
-            time.sleep(1.0)
+            # self.driver.execute_script("window.scrollBy(0, -750);")
+            # time.sleep(1.0)
             
             try:
                 load_more_button = WebDriverWait(self.driver, 2).until(
