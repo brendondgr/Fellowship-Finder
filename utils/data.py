@@ -8,6 +8,7 @@ from selenium.common.exceptions import NoSuchElementException
 from tqdm import tqdm
 from utils.data_manager import format_deadline
 from datetime import datetime
+import sys
 
 class DataProcessor:
     def __init__(self):
@@ -186,6 +187,8 @@ class DataProcessor:
                         processed_df[col] = ""
                     elif col == 'announced':
                         processed_df[col] = "no"
+                    elif col == 'links':
+                        processed_df[col] = []
                     else:
                         processed_df[col] = ""
             
@@ -209,6 +212,7 @@ class DataProcessor:
                         "other_funding": "",
                         "length_in_years": 0,
                         "interest_rating": 0.0,
+                        "links": []
                     }
 
                 if refined_data:
@@ -223,7 +227,8 @@ class DataProcessor:
                         refined_data_list.append(cleaned_data)
                         raw_df.loc[index, 'processed'] = 'yes'
             except Exception as e:
-                print(f"An error occurred while refining row {index + 2}: {e}")
+                tqdm.write(f"An error occurred while refining row {index + 2}: {e}")
+                sys.stdout.flush()
                 raw_df.loc[index, 'processed'] = 'error'
 
         if refined_data_list:
@@ -246,7 +251,7 @@ class DataProcessor:
             "title": str, "location": str, "continent": str,
             "deadline": str, "link": str, "description": str,
             "subjects": list, "total_compensation": str, "other_funding": str,
-            "length_in_years": int, "interest_rating": float
+            "length_in_years": int, "interest_rating": float, "links": list
         }
 
         # Ensure all required keys are present
@@ -259,6 +264,7 @@ class DataProcessor:
         data.setdefault('favorited', 0)
         data.setdefault('show', 1)
         data.setdefault('announced', 'no')
+        data.setdefault('links', [])
 
         # Clean and validate data types
         try:
@@ -284,6 +290,13 @@ class DataProcessor:
                 data["subjects"] = subjects
             else:
                 data["subjects"] = []
+            
+            # Links: should be a list of strings
+            links = data.get("links", [])
+            if isinstance(links, list) and all(isinstance(l, str) for l in links):
+                data["links"] = links
+            else:
+                data["links"] = []
 
             # Total Compensation: should start with $
             compensation = str(data.get("total_compensation", ""))

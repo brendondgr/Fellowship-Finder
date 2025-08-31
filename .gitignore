@@ -10,6 +10,7 @@ api_key.json
 .python-version
 filters.json
 *.psd
+tests/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
