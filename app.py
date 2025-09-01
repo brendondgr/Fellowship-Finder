@@ -370,8 +370,8 @@ def manage_api_key():
     if request.method == 'POST':
         try:
             new_api_key_data = request.json
-            if 'gemini_api_key' not in new_api_key_data:
-                return jsonify({"success": False, "error": "'gemini_api_key' not in request."}), 400
+            if not isinstance(new_api_key_data, dict):
+                return jsonify({"success": False, "error": "Invalid JSON body."}), 400
 
             print(f"[POST /api/api_key] Saving API key to: {api_key_path}")
 
@@ -382,10 +382,13 @@ def manage_api_key():
                         config_data = json.load(f)
                 except json.JSONDecodeError:
                     pass # File is empty/corrupt, will be overwritten
-            
-            # Update the specific key
-            config_data['gemini_api_key'] = new_api_key_data['gemini_api_key']
-            
+
+            # Update Gemini key if provided
+            if 'gemini_api_key' in new_api_key_data:
+                config_data['gemini_api_key'] = new_api_key_data['gemini_api_key']
+            else:
+                return jsonify({"success": False, "error": "'gemini_api_key' not in request."}), 400
+
             with open(api_key_path, 'w') as f:
                 json.dump(config_data, f, indent=4)
 
@@ -393,6 +396,34 @@ def manage_api_key():
         except Exception as e:
             print(f"[POST /api/api_key] Error saving API key: {e}")
             return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/api_key/perplexity', methods=['POST'])
+def manage_perplexity_api_key():
+    api_key_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'configs', 'api_key.json')
+    try:
+        body = request.json
+        if not isinstance(body, dict) or 'perplexity_api_key' not in body:
+            return jsonify({"success": False, "error": "'perplexity_api_key' not in request."}), 400
+
+        print(f"[POST /api/api_key/perplexity] Saving API key to: {api_key_path}")
+
+        config_data = {}
+        if os.path.exists(api_key_path):
+            try:
+                with open(api_key_path, 'r') as f:
+                    config_data = json.load(f)
+            except json.JSONDecodeError:
+                pass
+
+        config_data['perplexity_api_key'] = body['perplexity_api_key']
+
+        with open(api_key_path, 'w') as f:
+            json.dump(config_data, f, indent=4)
+
+        return jsonify({"success": True, "message": "Perplexity API key saved successfully."})
+    except Exception as e:
+        print(f"[POST /api/api_key/perplexity] Error saving API key: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/api/login/profellow', methods=['GET', 'POST'])
 def manage_profellow_login():
@@ -456,20 +487,23 @@ def scrape():
         except json.JSONDecodeError as e:
             print(f"[GET /scrape] Error decoding filters file: {e}. Proceeding with defaults.")
         
-        # Load API key if it exists
+        # Load API keys if they exist (Gemini and Perplexity)
         api_key_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'configs', 'api_key.json')
-        api_key = None
+        api_keys = {}
         try:
             with open(api_key_path, 'r') as f:
                 api_key_data = json.load(f)
-                api_key = api_key_data.get('gemini_api_key', '')
-            print(f"[GET /scrape] Loaded API key (length: {len(api_key) if api_key else 0})")
+                api_keys = {
+                    'gemini_api_key': api_key_data.get('gemini_api_key', ''),
+                    'perplexity_api_key': api_key_data.get('perplexity_api_key', '')
+                }
+            print(f"[GET /scrape] Loaded API keys (Gemini length: {len(api_keys['gemini_api_key']) if api_keys.get('gemini_api_key') else 0}, Perplexity length: {len(api_keys['perplexity_api_key']) if api_keys.get('perplexity_api_key') else 0})")
         except FileNotFoundError:
             print(f"[GET /scrape] API key file not found at: {api_key_path}")
         except json.JSONDecodeError as e:
             print(f"[GET /scrape] Error decoding API key file: {e}")
-        
-        return render_template('scrape.html', filters=filters, api_key=api_key)
+
+        return render_template('scrape.html', filters=filters, api_keys=api_keys)
     
     data = request.get_json()
     cleanup = data.get('cleanup', False)

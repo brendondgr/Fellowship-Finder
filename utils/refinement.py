@@ -9,6 +9,7 @@ import sys
 
 class GeminiRefiner:
     def __init__(self, model_name="sonar"):
+        print(f'Model Name: {model_name}')
         self.enabled = False
         api_key_path = 'configs/api_key.json'
         gemini_api_key = None
@@ -124,11 +125,14 @@ Ensure that this is a Valid JSON Object. Thanks!
         for attempt in range(max_retries):
             try:
                 if "gemini" in self.model.lower():
+                    # print(f'GEMINI DETECTED.')
                     response = self.client.models.generate_content(
                         model=self.model,
                         contents=self.prompt
                     )
+                    # print(f'Response: {response.text}')
                     refined_data = self._parse_response(response.text)
+                    print(f'Refined Data: {refined_data}')
                 elif "sonar" in self.model.lower():
                     refined_data = self.client.run(self.prompt)
                 else:

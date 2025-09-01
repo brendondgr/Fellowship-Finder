@@ -38,7 +38,18 @@ def main():
             print(f"No raw data file found at '{raw_csv_path}'. Exiting.")
             return
 
-        refiner = GeminiRefiner()
+        # Determine model based on filters.json 'Filter' key (Gemini or Perplexity)
+        filters_path = os.path.join(os.getcwd(), 'configs', 'filters.json')
+        model_name = 'gemini-2.5-flash-lite'
+        try:
+            with open(filters_path, 'r') as f:
+                filters_config = json.load(f)
+                chosen = str(filters_config.get('Filter', 'Gemini')).lower()
+                model_name = 'gemini-2.5-flash-lite' if chosen == 'gemini' else 'sonar'
+        except Exception as e:
+            print(f"Warning: Could not read Filter from {filters_path}: {e}. Defaulting to Gemini model.")
+
+        refiner = GeminiRefiner(model_name=model_name)
         data_processor.refine_and_save_fellowships(refiner)
     else:
         # Determine the browser to use

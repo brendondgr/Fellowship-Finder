@@ -160,6 +160,11 @@ class DataProcessor:
             return
 
         print(f"Found {len(unprocessed_df)} unprocessed fellowships to refine.")
+        try:
+            refiner_model = getattr(refiner, 'model', 'unknown')
+            print(f"Refiner status -> enabled={refiner.enabled}, model={refiner_model}")
+        except Exception:
+            pass
 
         if os.path.exists(self.processed_fellowship_csv_path):
             processed_df = pd.read_csv(self.processed_fellowship_csv_path)
@@ -247,30 +252,29 @@ class DataProcessor:
             print("Updated raw_fellowship_list.csv with processed status.")
 
     def _clean_and_validate_refined_data(self, data):
-        required_keys = {
-            "title": str, "location": str, "continent": str,
-            "deadline": str, "link": str, "description": str,
-            "subjects": list, "total_compensation": str, "other_funding": str,
-            "length_in_years": int, "interest_rating": float, "links": list
+        # Default values for all possible refined keys
+        defaults = {
+            "subjects": [],
+            "total_compensation": "N/A",
+            "other_funding": "",
+            "length_in_years": 0,
+            "interest_rating": 0.0,
+            "links": [],
+            "favorited": 0,
+            "show": 1,
+            "announced": "no",
+            "deadline": "NA"
         }
 
-        # Ensure all required keys are present
-        for key in required_keys:
-            if key not in data:
-                print(f"Missing key in refined data: {key}")
-                return None
-
-        # Add 'favorited' and 'show' if they are missing
-        data.setdefault('favorited', 0)
-        data.setdefault('show', 1)
-        data.setdefault('announced', 'no')
-        data.setdefault('links', [])
-
+        # Use defaults for any missing keys in the data
+        for key, value in defaults.items():
+            data.setdefault(key, value)
+            
         # Clean and validate data types
         try:
             # String fields
             for key in ["title", "location", "continent", "link", "description", "other_funding", "announced"]:
-                data[key] = str(data[key])
+                data[key] = str(data.get(key, ''))
 
             # Deadline: should be in YYYY-MM format
             deadline = str(data.get("deadline", ""))
@@ -281,7 +285,7 @@ class DataProcessor:
                     # Attempt to parse from "Month, YYYY" format
                     date_obj = datetime.strptime(deadline, "%B, %Y")
                     data["deadline"] = date_obj.strftime("%Y-%m")
-                except ValueError:
+                except (ValueError, TypeError):
                     data["deadline"] = "NA"
             
             # Subjects: should be a list of strings
@@ -298,14 +302,13 @@ class DataProcessor:
             else:
                 data["links"] = []
 
-            # Total Compensation: should start with $
-            compensation = str(data.get("total_compensation", ""))
-            if compensation.upper() == "N/A":
+            # Total Compensation: should be a string, ensure it's not NaN
+            compensation = data.get("total_compensation")
+            if pd.isna(compensation):
                 data["total_compensation"] = "N/A"
-            elif compensation.startswith("$"):
-                data["total_compensation"] = compensation
             else:
-                data["total_compensation"] = f"${compensation}"
+                data["total_compensation"] = str(compensation)
+
 
             # Length in years: should be an integer
             length = data.get("length_in_years")
@@ -313,14 +316,16 @@ class DataProcessor:
 
             # Interest rating: should be a float
             rating = data.get("interest_rating")
-            data["interest_rating"] = float(rating)
+            data["interest_rating"] = float(rating) if rating is not None else 0.0
 
             # Favorited and show: should be integers
             data['favorited'] = int(data.get('favorited', 0))
             data['show'] = int(data.get('show', 1))
 
         except (ValueError, TypeError) as e:
-            print(f"Data validation error: {e}")
-            return None
+            tqdm.write(f"Data validation error for link {data.get('link', 'N/A')}: {e}")
+            sys.stdout.flush()
+            # Still return data with defaults even if a field fails validation
+            return data
 
         return data

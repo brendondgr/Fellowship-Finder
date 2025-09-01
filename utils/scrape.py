@@ -43,8 +43,8 @@ class ProfellowBot:
         # --- Data Processor ---
         self.data_processor = DataProcessor()
 
-        # --- Gemini Refiner ---
-        self.refiner = GeminiRefiner()
+        # --- Refiner will be initialized later (after scraping) to ensure freshest API keys and selection ---
+        self.refiner = None
 
         # Ensure tmp directory exists
         os.makedirs(self.tmp_path, exist_ok=True)
@@ -393,6 +393,15 @@ class ProfellowBot:
 
             # --- Refine and Save Data ---
             print("Starting data refinement process...")
+            try:
+                with open(os.path.join(self.configs_path, "filters.json"), "r") as f:
+                    latest_filters = json.load(f)
+                selected_filter = latest_filters.get('Filter', 'Gemini')
+                model_name = 'gemini-2.5-flash-lite' if str(selected_filter).lower() == 'gemini' else 'sonar'
+            except Exception:
+                # Fallback to Gemini if filters cannot be loaded
+                model_name = 'gemini-2.5-flash-lite'
+            self.refiner = GeminiRefiner(model_name=model_name)
             self.data_processor.refine_and_save_fellowships(self.refiner)
             print("Data refinement process finished.")
 

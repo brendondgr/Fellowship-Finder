@@ -37,30 +37,49 @@
             <!-- Browser Type -->
             <div>
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">Browser Type</h2>
-                <div class="flex flex-wrap gap-2 sm:gap-4">
-                    <button data-browser="chrome" class="browser-btn {% if selected_browser == 'chrome' %}selected{% else %}text-gray-600{% endif %} flex-grow sm:flex-grow-0 text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 hover:opacity-80 transition-all duration-200">Chrome</button>
-                    <button data-browser="firefox" class="browser-btn {% if selected_browser == 'firefox' %}selected{% else %}text-gray-600{% endif %} flex-grow sm:flex-grow-0 text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 hover:opacity-80 transition-all duration-200">Firefox</button>
-                    <button data-browser="safari" class="browser-btn {% if selected_browser == 'safari' %}selected{% else %}text-gray-600{% endif %} flex-grow sm:flex-grow-0 text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 hover:opacity-80 transition-all duration-200">Safari</button>
-                    <button data-browser="edge" class="browser-btn {% if selected_browser == 'edge' %}selected{% else %}text-gray-600{% endif %} flex-grow sm:flex-grow-0 text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 hover:opacity-80 transition-all duration-200">Edge</button>
+                <div class="grid grid-cols-2 gap-2 sm:gap-4">
+                    <button data-browser="chrome" class="browser-btn {% if selected_browser == 'chrome' %}selected{% else %}text-gray-600{% endif %} text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 hover:opacity-80 transition-all duration-200">Chrome</button>
+                    <button data-browser="firefox" class="browser-btn {% if selected_browser == 'firefox' %}selected{% else %}text-gray-600{% endif %} text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 hover:opacity-80 transition-all duration-200">Firefox</button>
+                    <button data-browser="safari" class="browser-btn {% if selected_browser == 'safari' %}selected{% else %}text-gray-600{% endif %} text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 hover:opacity-80 transition-all duration-200">Safari</button>
+                    <button data-browser="edge" class="browser-btn {% if selected_browser == 'edge' %}selected{% else %}text-gray-600{% endif %} text-sm font-medium py-2 px-4 rounded-lg border-2 border-gray-200 hover:opacity-80 transition-all duration-200">Edge</button>
                 </div>
             </div>
-            <!-- Gemini API Key -->
+            <!-- API Keys with Provider Toggle -->
             <div>
-                 <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                    Gemini API Key
-                    <div class="group relative ml-2">
-                        <i class="fa-solid fa-circle-info text-gray-400"></i>
-                        <div class="absolute bottom-full mb-2 w-72 bg-gray-800 text-white text-xs rounded-lg py-2 px-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                            Enter your Gemini API key here and click "Save Key" to store it permanently in <code>configs/api_key.json</code>. The model used is "Gemini Flash Lite", which permits ~1000 API calls daily and adheres to RPM limits.
-                            <svg class="absolute text-gray-800 h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                {% set api_provider = filters.get('Filter', 'Gemini') %}
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-800 flex items-center">
+                        API Keys
+                        <div class="group relative ml-2">
+                            <i class="fa-solid fa-circle-info text-gray-400"></i>
+                            <div class="absolute bottom-full mb-2 w-80 bg-gray-800 text-white text-xs rounded-lg py-2 px-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                Enter your API keys and click the save icon to store them in <code>configs/api_key.json</code>. Choose between <strong>Gemini</strong> (model: gemini-2.5-flash-lite) and <strong>Perplexity</strong> (model: sonar) using the toggle to the right.
+                                <svg class="absolute text-gray-800 h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                            </div>
                         </div>
+                    </h2>
+                    <!-- Provider Toggle -->
+                    <div id="api-provider-logic-container" class="relative flex items-center border border-gray-300 rounded-lg p-0.5 w-36 cursor-pointer">
+                        <div id="api-provider-logic-slider" class="absolute top-0.5 left-0.5 h-[calc(100%-4px)] w-[calc(50%-2px)] bg-gray-800 rounded-md transition-transform duration-300 ease-in-out" style="transform: {% if api_provider and api_provider|lower == 'perplexity' %}translateX(calc(100% + 2px)){% else %}translateX(0%){% endif %};"></div>
+                        <button type="button" data-provider="Gemini" class="provider-logic-btn {% if api_provider and api_provider|lower == 'gemini' %}selected text-white{% else %}text-gray-500{% endif %} flex-1 text-xs font-bold py-1 px-3 rounded-md relative z-10 transition-colors duration-300">Gemini</button>
+                        <button type="button" data-provider="Perplexity" class="provider-logic-btn {% if api_provider and api_provider|lower == 'perplexity' %}selected text-white{% else %}text-gray-500{% endif %} flex-1 text-xs font-bold py-1 px-3 rounded-md relative z-10 transition-colors duration-300">Perplexity</button>
                     </div>
-                </h2>
+                </div>
+
+                <!-- Gemini Row -->
+                <div class="flex items-center gap-x-2 mb-3">
+                    <span class="w-24 text-sm font-medium text-gray-700">Gemini</span>
+                    <input type="password" id="gemini-api-key-input" placeholder="Enter Gemini API key" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" value="{% if api_keys and api_keys.get('gemini_api_key') %}{{ api_keys.get('gemini_api_key') }}{% endif %}">
+                    <button id="save-gemini-api-key-btn" class="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-200" aria-label="Save Gemini API key">
+                        <img src="{{ url_for('static', filename='svg/save.svg') }}" alt="Save" class="h-4 w-4 filter-white">
+                    </button>
+                </div>
+                <!-- Perplexity Row -->
                 <div class="flex items-center gap-x-2">
-                    <input type="password" id="api-key-input" placeholder="Enter your API key" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" value="{% if api_key %}{{ api_key }}{% endif %}">
-                    <button id="save-api-key-btn" class="inline-flex items-center text-sm font-medium py-2 pl-3 pr-4 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-200 whitespace-nowrap">
-                        <img src="{{ url_for('static', filename='svg/save.svg') }}" alt="Save" class="h-4 w-4 mr-2 filter-white">
-                        Save
+                    <span class="w-24 text-sm font-medium text-gray-700">Perplexity</span>
+                    <input type="password" id="perplexity-api-key-input" placeholder="Enter Perplexity API key" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" value="{% if api_keys and api_keys.get('perplexity_api_key') %}{{ api_keys.get('perplexity_api_key') }}{% endif %}">
+                    <button id="save-perplexity-api-key-btn" class="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-200" aria-label="Save Perplexity API key">
+                        <img src="{{ url_for('static', filename='svg/save.svg') }}" alt="Save" class="h-4 w-4 filter-white">
                     </button>
                 </div>
             </div>

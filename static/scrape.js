@@ -95,33 +95,61 @@ function setupKeywordLogicToggle() {
     });
 }
 
-// --- 4. Save API Key ---
-function setupSaveApiKeyButton() {
-    const saveBtn = document.getElementById('save-api-key-btn');
-    if (!saveBtn) return;
+// --- 4. Provider Toggle (Gemini / Perplexity) ---
+function setupProviderToggle() {
+    const slider = document.getElementById('api-provider-logic-slider');
+    const buttons = document.querySelectorAll('.provider-logic-btn');
+    if (!slider || buttons.length === 0) return;
+
+    buttons.forEach(button => {
+        button.addEventListener('click', function () {
+            const provider = this.getAttribute('data-provider');
+
+            buttons.forEach(btn => {
+                btn.classList.remove('selected', 'text-white');
+                btn.classList.add('text-gray-500');
+            });
+
+            this.classList.add('selected', 'text-white');
+            this.classList.remove('text-gray-500');
+
+            if (provider && provider.toLowerCase() === 'perplexity') {
+                slider.style.transform = 'translateX(calc(100% + 2px))';
+            } else {
+                slider.style.transform = 'translateX(0%)';
+            }
+        });
+    });
+}
+
+// --- 5. Save API Keys (Gemini / Perplexity) ---
+function setupSaveGeminiKeyButton() {
+    const saveBtn = document.getElementById('save-gemini-api-key-btn');
+    const input = document.getElementById('gemini-api-key-input');
+    if (!saveBtn || !input) return;
 
     saveBtn.addEventListener('click', () => {
-        const apiKeyInput = document.getElementById('api-key-input');
-        if (!apiKeyInput) return;
+        const apiKey = input.value.trim();
+        if (!apiKey) return;
 
-        const apiKey = apiKeyInput.value.trim();
+        saveGeminiApiKey(apiKey)
+            .then(() => alert('Gemini API key saved successfully!'))
+            .catch(err => alert('Failed to save Gemini API key: ' + err.message));
+    });
+}
 
-        const originalButtonText = saveBtn.innerHTML;
-        saveBtn.disabled = true;
-        saveBtn.innerHTML = 'Saving...';
+function setupSavePerplexityKeyButton() {
+    const saveBtn = document.getElementById('save-perplexity-api-key-btn');
+    const input = document.getElementById('perplexity-api-key-input');
+    if (!saveBtn || !input) return;
 
-        saveApiKey(apiKey)
-            .then(() => {
-                alert('API key saved successfully!');
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred: ' + error.message);
-            })
-            .finally(() => {
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = originalButtonText;
-            });
+    saveBtn.addEventListener('click', () => {
+        const apiKey = input.value.trim();
+        if (!apiKey) return;
+
+        savePerplexityApiKey(apiKey)
+            .then(() => alert('Perplexity API key saved successfully!'))
+            .catch(err => alert('Failed to save Perplexity API key: ' + err.message));
     });
 }
 
@@ -149,8 +177,12 @@ function collectFormData() {
     const keywordLogicBtn = document.querySelector('.keyword-logic-btn.selected');
     const keywordLogic = keywordLogicBtn ? keywordLogicBtn.getAttribute('data-logic') : 'AND';
 
+    const providerBtn = document.querySelector('.provider-logic-btn.selected');
+    const provider = providerBtn ? providerBtn.getAttribute('data-provider') : 'Gemini';
+
     const data = {
         "Browsing": selectedBrowser,
+        "Filter": provider,
         "categories": {},
         "keywords": {
             "type": keywordLogic,
@@ -198,13 +230,19 @@ function collectFormData() {
 function saveFiltersAndStartScraping(formData) {
     const beginSearchingBtn = document.getElementById('begin-searching-btn');
 
-    // First, save the API key if one is provided.
-    const apiKeyInput = document.getElementById('api-key-input');
-    const apiKeyPromise = apiKeyInput && apiKeyInput.value.trim() ?
-        saveApiKey(apiKeyInput.value.trim()) :
-        Promise.resolve();
+    // First, save any API keys that were provided.
+    const geminiInput = document.getElementById('gemini-api-key-input');
+    const perplexityInput = document.getElementById('perplexity-api-key-input');
+    const keySaves = [];
 
-    apiKeyPromise
+    if (geminiInput && geminiInput.value.trim()) {
+        keySaves.push(saveGeminiApiKey(geminiInput.value.trim()));
+    }
+    if (perplexityInput && perplexityInput.value.trim()) {
+        keySaves.push(savePerplexityApiKey(perplexityInput.value.trim()));
+    }
+
+    Promise.all(keySaves)
         .then(() => {
             // Then, save the filters and trigger the scraping process.
             return fetch('/api/filters', {
@@ -240,7 +278,7 @@ function saveFiltersAndStartScraping(formData) {
         });
 }
 
-function saveApiKey(apiKey) {
+function saveGeminiApiKey(apiKey) {
     return fetch('/api/api_key', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -248,13 +286,32 @@ function saveApiKey(apiKey) {
     })
     .then(response => {
         if (!response.ok) {
-            return response.json().then(err => { throw new Error(err.error || 'Failed to save API key') });
+            return response.json().then(err => { throw new Error(err.error || 'Failed to save Gemini API key') });
         }
         return response.json();
     })
     .then(data => {
         if (!data.success) {
-            throw new Error(data.error || 'A problem occurred while saving the API key.');
+            throw new Error(data.error || 'A problem occurred while saving the Gemini API key.');
+        }
+    });
+}
+
+function savePerplexityApiKey(apiKey) {
+    return fetch('/api/api_key/perplexity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ "perplexity_api_key": apiKey })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => { throw new Error(err.error || 'Failed to save Perplexity API key') });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!data.success) {
+            throw new Error(data.error || 'A problem occurred while saving the Perplexity API key.');
         }
     });
 }
@@ -267,7 +324,9 @@ window.initializeScrapeForm = function() {
     setupBrowserSelection();
     setupCollapsibleSections();
     setupKeywordLogicToggle();
-    setupSaveApiKeyButton();
+    setupProviderToggle();
+    setupSaveGeminiKeyButton();
+    setupSavePerplexityKeyButton();
     setupFormSubmission();
 };
 
