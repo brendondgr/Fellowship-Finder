@@ -9,7 +9,7 @@ import sys
 
 class GeminiRefiner:
     def __init__(self, model_name="sonar"):
-        print(f'Model Name: {model_name}')
+        print(f'Model Name received in Refiner: {model_name}')
         self.enabled = False
         api_key_path = 'configs/api_key.json'
         gemini_api_key = None
@@ -25,24 +25,34 @@ class GeminiRefiner:
                         perplexity_api_key = api_key_data.get('perplexity_api_key')
             except (json.JSONDecodeError, IOError) as e:
                 print(f"Warning: Could not read API key file at {api_key_path}. Error: {e}")
-                return
+                # Keep self.enabled as False, no return here
+
+        print(f"DEBUG Refiner: Loaded Gemini API Key (present and non-empty): {gemini_api_key is not None and len(gemini_api_key) > 0}")
+        print(f"DEBUG Refiner: Loaded Perplexity API Key (present and non-empty): {perplexity_api_key is not None and len(perplexity_api_key) > 0}")
 
         if "gemini" in model_name.lower():
             if not gemini_api_key:
                 print("Warning: `gemini_api_key` not found or is empty in `configs/api_key.json`. GeminiRefiner will be disabled.")
-                return
+                # Keep self.enabled as False, no return here
         elif "sonar" in model_name.lower():
             if not perplexity_api_key:
                 print("Warning: `perplexity_api_key` not found or is empty in `configs/api_key.json`. GeminiRefiner will be disabled.")
-                return
+                # Keep self.enabled as False, no return here
 
-        self.enabled = True
+        # Only enable if the relevant key is present
+        if ("gemini" in model_name.lower() and gemini_api_key) or \
+           ("sonar" in model_name.lower() and perplexity_api_key):
+            self.enabled = True
+        else:
+            self.enabled = False # Explicitly set to False if checks failed
+
         self.model = model_name
+        print(f"DEBUG Refiner: Final self.enabled status: {self.enabled}")
         
         if "flash" in self.model.lower():
-            self.rate_limit_interval = 60 / 10
+            self.rate_limit_interval = 60 / 10  # More generous for Flash
         elif "pro" in self.model.lower():
-            self.rate_limit_interval = 60 / 5
+            self.rate_limit_interval = 60 / 5 # Standard Pro model limit
         elif "sonar" in self.model.lower():
             self.rate_limit_interval = 60 / 50
         else:
@@ -125,16 +135,19 @@ Ensure that this is a Valid JSON Object. Thanks!
         for attempt in range(max_retries):
             try:
                 if "gemini" in self.model.lower():
-                    # print(f'GEMINI DETECTED.')
-                    response = self.client.models.generate_content(
-                        model=self.model,
+                    print(f'GEMINI DETECTED. Attempt {attempt + 1}. Using model: models/{self.model}')
+                    # CORRECTED API CALL: Use self.client.generate_content directly
+                    response = self.client.generate_content(
+                        model=f'models/{self.model}', # Prepend 'models/' as required
                         contents=self.prompt
                     )
-                    # print(f'Response: {response.text}')
+                    print(f'Response Text: {response.text}')
                     refined_data = self._parse_response(response.text)
-                    print(f'Refined Data: {refined_data}')
+                    print(f'Refined Data (parsed): {refined_data}')
                 elif "sonar" in self.model.lower():
+                    print(f'PERPLEXITY DETECTED. Attempt {attempt + 1}.')
                     refined_data = self.client.run(self.prompt)
+                    print(f'Refined Data (parsed): {refined_data}')
                 else:
                     raise ValueError(f"Invalid model name: {self.model}")
                 return refined_data
